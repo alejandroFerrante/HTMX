@@ -1,0 +1,24 @@
+<html>
+
+<script>
+
+var master;
+
+function loadMaster(masterText){
+	master = JSON.parse(masterText);
+}
+
+function saveMaster(){
+	download( JSON.stringify(master) , 'MasterData.json' , 'application/json');
+}
+
+function download(text, name, type) {
+  var a = document.getElementById("a");
+  var file = new Blob([text], {type: type});
+  a.href = URL.createObjectURL(file);
+  a.download = name;
+}
+
+</script>
+
+</html>
