@@ -3,7 +3,7 @@
 <html>
 
 <style>
- #mydiv {
+ .dragObjDiv {
   position: absolute;
   z-index: 9;
   background-color: #f1f1f1;
@@ -11,7 +11,7 @@
   text-align: center;
 }
 
-#mydivheader {
+.dragObjHeader {
   padding: 10px;
   cursor: move;
   z-index: 10;
@@ -19,44 +19,47 @@
   color: #fff;
 }
 
-#mydiv2 {
-  position: absolute;
-  z-index: 9;
-  background-color: #f1f1f1;
-  border: 1px solid #d3d3d3;
-  text-align: center;
-}
-
-#mydivheader2 {
-  padding: 10px;
+.dragObjSubHeader {
+  padding: 15px;
   cursor: move;
   z-index: 10;
-  background-color: #2196F3;
-  color: #fff;
+  background-color: #8c8c8c;
+  color: #2b2b2b;
 }
+
 </style>
 
 <body>
-<div id="mydiv">
+<div id="mydiv" class="dragObjDiv" >
   <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
-  <div id="mydivheader">Click here to move</div>
-  <p>Move</p>
-  <p>this</p>
-  <p>DIV</p>
+  <div class="dragObjHeader" >Object 1</div>
+	<div>
+	  <div class="dragObjSubHeader" >Properties</div>	
+	</div>  
+	
+  <div class="dragObjSubHeader" >Methods</div>
 </div>
 
-<div id="mydiv2">
+<div id="mydiv2" class="dragObjDiv" >
   <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
-  <div id="mydivheader2">Click here to move</div>
-  <p>Move</p>
-  <p>this</p>
-  <p>DIV</p>
+  <div class="dragObjHeader" >Object 2</div>
+  <div class="dragObjSubHeader" >Properties</div>
+  <div class="dragObjSubHeader" >Methods</div>
 </div>
+
+<a id="downloadLink" style="display:none" >  </a>
 
 </body>
+<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
 <script>
 
+////MASTER DATA//////////////////////////////////
+
 var master;
+//objectsToShow
+//objectsMap
+
 
 function loadMaster(masterText){
 	master = JSON.parse(masterText);
@@ -67,11 +70,22 @@ function saveMaster(){
 }
 
 function download(text, name, type) {
-  var a = document.getElementById("a");
+  var a = document.getElementById("downloadLink");
   var file = new Blob([text], {type: type});
   a.href = URL.createObjectURL(file);
   a.download = name;
+  a.click();
 }
+
+///////////////////////////////////////////////////////////
+
+
+///DRAG//ELEMENTS//////////////////////////////////////////
+
+var maxDragX = screen.width * 0.85;
+var minDragX = 20;
+var maxDragY = screen.height * 0.85;
+var minDragY = 20;
 
 
 function dragElement(elmnt) {
@@ -104,8 +118,15 @@ function dragElement(elmnt) {
     pos3 = e.clientX;
     pos4 = e.clientY;
     // set the element's new position:
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    var finalX = (elmnt.offsetTop - pos2);
+    if(finalX > maxDragX){finalX = maxDragX;}
+    if(finalX < minDragX){finalX = minDragX;}
+
+    var finalY = (elmnt.offsetLeft - pos1);
+    if(finalY > maxDragY){finalX = maxDragY;}
+    if(finalY < minDragY){finalY = minDragY;}
+    elmnt.style.top =  finalX+ "px";
+    elmnt.style.left = finalY + "px";
   }
 
   function closeDragElement() {
@@ -117,6 +138,8 @@ function dragElement(elmnt) {
 
 dragElement(document.getElementById("mydiv"));
 dragElement(document.getElementById("mydiv2"));
+
+///////////////////////////////////////////////////////////
 
 
 </script>
