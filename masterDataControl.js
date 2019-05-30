@@ -1,4 +1,5 @@
 
+var originalMaster;
 var master;
 //objectsToShow
 
@@ -6,11 +7,15 @@ var master;
 
 function loadMaster(masterText){
 	master = JSON.parse(masterText);
+    originalMaster = JSON.parse(masterText);
 	$(this).trigger( "masterDataLoaded" );
 }
 
 function saveMaster(){
-	download( JSON.stringify(master) , 'MasterData.json' , 'application/json');
+    var jayson = JSON.stringify(master);
+	download( jayson , 'MasterData.json' , 'application/json');
+    originalMaster = JSON.parse(jayson);
+    master = JSON.parse(jayson);
 }
 
 function download(text, name, type) {
@@ -54,6 +59,10 @@ function removeMethodFromMasterData(objectId , methodName ){
         }
     }
     master.objects[objectId].methods = newMethodsList;
+}
+
+function restoreObjectToOriginal(objectId){
+    master.objects[objectId] = originalMaster.objects[objectId];   
 }
 
 function getPropertiesFromMasterDataFor(objectId){
