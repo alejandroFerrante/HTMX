@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<html>
+  <head>
+
+    <!-- SCRIPTS -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="draggable.js"></script>
+    <script type="text/javascript" src="masterDataControl.js"></script>
+    
+    <!-- BOOTSTRAP -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  
+    <!-- DRAGGABLE STYLESHEET-->
+    <link rel="stylesheet" type="text/css" href="draggable.css">
+
+    <style>
+      .headerDiv { grid-area: header; }
+      .leftPannel { grid-area: menu; }
+      .upperPannel { grid-area: upperPannel; }
+      .mainPannel { grid-area: main; height:550px;}
+
+      .grid-container {
+        display: grid;
+        grid-template-areas:
+          'header header header header header header'
+          'menu upperPannel upperPannel upperPannel upperPannel upperPannel'
+          'menu main main main main main'
+          'menu footer footer footer footer footer';
+        grid-gap: 10px;
+        background-color: #dbdbdb;
+        padding: 10px;
+      }
+
+      .grid-container > div {
+        background-color: rgba(255, 255, 255, 0.8);
+        text-align: center;
+        padding: 20px 0;
+        font-size: 30px;
+      }
+    </style>
+
+</head>
+
+<body>
+
+<!-- SPLASH -->
+
+<!-- -->
+
+<!-- MAIN -->
+  <div class="grid-container">
+    <div class="headerDiv">
+      MODEL CONSTRUCT
+    </div>
+    
+    <div class="leftPannel">
+      
+      <div class="loadData">
+        <button class="dataLoadButton" >Load Master Data</button>
+      </div>
+
+      <div class="objectsShowList">
+      </div>
+
+    </div>
+    
+    <div class="upperPannel">
+        <div class="upperPannelContent" style="display:none">
+          <button class="dataSaveButton" >Save Master Data</button>
+          <button class="objectCreateButton" >Create New Object</button>
+        </div>
+    </div>  
+    
+    <div class="mainPannel">
+      <div class="canvasContainer">
+      </div>  
+    </div>
+  
+  </div>
+<!-- -->
+
+  
+
+<a id="downloadLink" style="display:none" >  </a>
+<input type="file" id="fileInput" name="files[]" style="display:none" />
+
+</body>
+
+<script>
+
+  
+
+  $("#fileInput").change(function() {
+    var file = $("#fileInput")[0].files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {  loadMaster(e.target.result); };
+    reader.readAsText(file);
+  });
+
+  $(".dataLoadButton").on("click", function() {
+    $("#fileInput").trigger("click");
+  });
+
+  $(".dataSaveButton").on("click", function() {
+    saveMaster();
+  });
+
+  $( this ).on( "masterDataLoaded", function() {
+    onMasterDataLoaded();
+  });
+
+  
+  function objectSelected(isChecked , objectId){
+    if(isChecked){
+      addObjectToCanvas(objectId)
+    }else{
+      removeObjectFromCanvas(objectId);
+    }
+  }
+
+  function onMasterDataLoaded(){
+    $('.loadData')[0].style = 'display:none';
+    $('.upperPannelContent')[0].style = 'display:block';
+    fillObjectsList();
+  }
+
+  function fillObjectsList(){
+    var strList = '<div class="panel panel-default">';
+    strList +=    '   <div class="panel-heading">Objects</div>';
+    strList +=    '   <div class="panel-body">';
+    strList +=    '    <ul>';
+    for(var i = 0 ; i < master.lastID + 1 ; i++){
+      //console.log(master.objects[i].name);
+      strList +=  '     <li><input type="checkbox" class="showObjCheckbox" onclick="objectSelected(this.checked , '+master.objects[i].id+')" ></input>'+master.objects[i].name+'</li>';
+    }
+    strList +=    '   </ul>';
+    strList +=    '  </div>';
+    strList +=    '</div>';
+    $('.objectsShowList')[0].innerHTML = strList;
+  }
+
+  function addObjectToCanvas(objectId){
+    minDragX = 374;
+    maxDragX = 1056;  
+    
+    minDragY = 200;
+    maxDragY = 430;
+
+    var strObj = '';
+    strObj += '<div id="draggableDiv_'+objectId+'" class="dragObjDiv" >';
+    
+    strObj += getDraggaleDivHtmlFor(objectId);
+
+    strObj += '</div>';
+    $('.canvasContainer')[0].innerHTML += strObj;
+    dragElement(document.getElementById("draggableDiv_"+objectId)); 
+  }
+
+  function getDraggaleDivHtmlFor(objectId){
+    var objectProperties = getPropertiesFromMasterDataFor(objectId);
+    var objectMethods = getMethodsFromMasterDataFor(objectId);
+
+    var strObj = '   <div class="dragObjHeader" >'+getObjectNameFromMasterDataFor(objectId)+'</div>';
+    strObj += '   <div class="dragObjSubHeader" >Properties</div>';
+    
+    if(objectProperties.length > 0 ){
+      strObj += '   <div>';
+      strObj += '   <ul>';
+      for(var i = 0 ; i < objectProperties.length ; i++){
+        strObj += '<ul>('+objectProperties[i].type+') '+objectProperties[i].name+'</ul>';
+      }
+      strObj += '   </div>';
+    }
+
+    strObj += '   <div class="dragObjSubHeader" >Methods</div>';
+
+    if(objectMethods.length > 0 ){
+      strObj += '   <div>';
+      strObj += '   <ul>';
+      for(var i = 0 ; i < objectMethods.length ; i++){
+        strObj += '<ul>'+objectMethods[i].name+'</ul>';
+      }
+      strObj += '   </div>';
+    }
+
+    return strObj;
+  }
+
+  function removeObjectFromCanvas(objectId){
+    var element = document.getElementById("draggableDiv_"+objectId);
+    element.parentNode.removeChild(element); 
+  }
+
+
+  function addPropertyToObject(objectId , propertyType , propertyName){
+    addPropertyToMasterData(objectId , propertyType , propertyName);
+    document.getElementById("draggableDiv_"+objectId).innerHTML = getDraggaleDivHtmlFor(objectId); 
+  }
+
+
+  function removePropertyFromObject(objectId , propertyType , propertyName){
+    removePropertyFromMasterData(objectId , propertyType , propertyName);
+    document.getElementById("draggableDiv_"+objectId).innerHTML = getDraggaleDivHtmlFor(objectId); 
+  }
+
+  function addMethodToObject(objectId , methodName , parameters){
+    addMethodToMasterData(objectId , methodName , parameters);
+    document.getElementById("draggableDiv_"+objectId).innerHTML = getDraggaleDivHtmlFor(objectId); 
+  }
+
+
+  function removeMethodFromObject(objectId , methodName ){
+    removeMethodFromMasterData(objectId , methodName );
+    document.getElementById("draggableDiv_"+objectId).innerHTML = getDraggaleDivHtmlFor(objectId); 
+  }
+
+</script>
+
+</html>

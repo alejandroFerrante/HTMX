@@ -1,35 +1,12 @@
 <!DOCTYPE html>
 <meta charset="utf-8"/>
 <html>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="draggable.css">
 
-<style>
- .dragObjDiv {
-  position: absolute;
-  z-index: 9;
-  background-color: #f1f1f1;
-  border: 1px solid #d3d3d3;
-  text-align: center;
-}
-
-.dragObjHeader {
-  padding: 10px;
-  cursor: move;
-  z-index: 10;
-  background-color: #2196F3;
-  color: #fff;
-}
-
-.dragObjSubHeader {
-  padding: 15px;
-  cursor: move;
-  z-index: 10;
-  background-color: #8c8c8c;
-  color: #2b2b2b;
-}
-
-</style>
 
 <body>
+  
 <div id="mydiv" class="dragObjDiv" >
   <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
   <div class="dragObjHeader" >Object 1</div>
@@ -52,89 +29,10 @@
 </body>
 <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
 <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
+<script type="text/javascript" src="draggable.js"></script>
+<script type="text/javascript" src="masterDataControl.js"></script>
 <script>
 
-////MASTER DATA//////////////////////////////////
-
-var master;
-//objectsToShow
-//objectsMap
-
-
-function loadMaster(masterText){
-	master = JSON.parse(masterText);
-}
-
-function saveMaster(){
-	download( JSON.stringify(master) , 'MasterData.json' , 'application/json');
-}
-
-function download(text, name, type) {
-  var a = document.getElementById("downloadLink");
-  var file = new Blob([text], {type: type});
-  a.href = URL.createObjectURL(file);
-  a.download = name;
-  a.click();
-}
-
-///////////////////////////////////////////////////////////
-
-
-///DRAG//ELEMENTS//////////////////////////////////////////
-
-var maxDragX = screen.width * 0.85;
-var minDragX = 20;
-var maxDragY = screen.height * 0.85;
-var minDragY = 20;
-
-
-function dragElement(elmnt) {
-  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  if (document.getElementById(elmnt.id + "header")) {
-    // if present, the header is where you move the DIV from:
-    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
-  } else {
-    // otherwise, move the DIV from anywhere inside the DIV:
-    elmnt.onmousedown = dragMouseDown;
-  }
-
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
-  }
-
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    var finalX = (elmnt.offsetTop - pos2);
-    if(finalX > maxDragX){finalX = maxDragX;}
-    if(finalX < minDragX){finalX = minDragX;}
-
-    var finalY = (elmnt.offsetLeft - pos1);
-    if(finalY > maxDragY){finalX = maxDragY;}
-    if(finalY < minDragY){finalY = minDragY;}
-    elmnt.style.top =  finalX+ "px";
-    elmnt.style.left = finalY + "px";
-  }
-
-  function closeDragElement() {
-    // stop moving when mouse button is released:
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
 
 dragElement(document.getElementById("mydiv"));
 dragElement(document.getElementById("mydiv2"));

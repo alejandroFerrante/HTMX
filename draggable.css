@@ -1,0 +1,23 @@
+.dragObjDiv {
+  position: absolute;
+  z-index: 9;
+  background-color: #f1f1f1;
+  border: 1px solid #d3d3d3;
+  text-align: center;
+}
+
+.dragObjHeader {
+  padding: 10px;
+  cursor: move;
+  z-index: 10;
+  background-color: #2196F3;
+  color: #fff;
+}
+
+.dragObjSubHeader {
+  padding: 15px;
+  cursor: move;
+  z-index: 10;
+  background-color: #8c8c8c;
+  color: #2b2b2b;
+}
