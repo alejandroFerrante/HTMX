@@ -1,4 +1,4 @@
-<!-- git add .  , git push , git comit origin master -->
+<!-- git pull |  git add .  && git commit -m "someMessage" && git push origin master -->
 <!DOCTYPE html>
 <meta charset="utf-8"/>
 <html>
@@ -52,7 +52,7 @@
       .modal {
         display: none; /* Hidden by default */
         position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
+        z-index: 10; /* Sit on top */
         padding-top: 100px; /* Location of the box */
         left: 0;
         top: 0;
@@ -60,7 +60,8 @@
         height: 100%; /* Full height */
         overflow: auto; /* Enable scroll if needed */
         background-color: rgb(0,0,0); /* Fallback color */
-        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+        color:white;
       }
 
       /* Modal Content */
@@ -224,7 +225,7 @@
       strObj += '   <div>';
       strObj += '   <ul>';
       for(var i = 0 ; i < objectProperties.length ; i++){
-        strObj += '<ul>  ('+objectProperties[i].type+') '+objectProperties[i].name+'  <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEdit( \''+objectId+'\' ,  \''+objectProperties[i].name+'\' , \''+objectProperties[i].type+'\' )" ></span>  <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="removePropertyFromObject( \''+objectId+'\' , \''+objectProperties[i].type+'\' , \''+objectProperties[i].name+'\')" ></span> </ul>';
+        strObj += '<ul>  ('+objectProperties[i].type+') '+objectProperties[i].name+'  <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEditProperty( \''+objectId+'\' ,  \''+objectProperties[i].name+'\' , \''+objectProperties[i].type+'\' )" ></span>  <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="removePropertyFromObject( \''+objectId+'\' , \''+objectProperties[i].type+'\' , \''+objectProperties[i].name+'\')" ></span> </ul>';
       }
       strObj += '   </div>';
     }
@@ -235,7 +236,7 @@
       strObj += '   <div>';
       strObj += '   <ul>';
       for(var i = 0 ; i < objectMethods.length ; i++){
-        strObj += '<ul>'+objectMethods[i].name+'  <span style="cursor: pointer" class="glyphicon glyphicon-edit"></span>  <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="removeMethodFromObject( \''+objectId+'\'  , \''+objectMethods[i].name+'\' )" ></span>  </ul>';
+        strObj += '<ul>'+objectMethods[i].name+'  <span style="cursor:pointer" class="glyphicon glyphicon-edit" onclick="openEditMethod( \''+objectId+'\' ,  \''+objectMethods[i].name+'\'  , '+JSON.stringify(objectMethods[i].params)+' )" ></span>  <span style="cursor:pointer" class="glyphicon glyphicon-trash" onclick="removeMethodFromObject( \''+objectId+'\'  , \''+objectMethods[i].name+'\' )" ></span>  </ul>';
       }
       strObj += '   </div>';
     }
@@ -278,23 +279,21 @@
 
 
 
-  var editType;
   var objectEditing;
-  var propertyNameEditing;
-  var propertyTypeEditing;
-  var newPropertyName;
-  var newPropertyType;
-  var methodNameEditing;
-  var newMethodName;
+  var oldPropertyType;
+  var oldPropertyName;
+
+  var oldMethodName;
   var newMethodParams;
+
+  
   var newName;
 
   function openEditProperty( objectId , objectPropertyName , objectPropertyType ){
     
-    editType = 'PROPERTY';
     objectEditing = objectId;
-    propertyNameEditing = objectPropertyName;
-    propertyTypeEditing = objectPropertyType;
+    oldPropertyType = objectPropertyType;
+    oldPropertyName = objectPropertyName;
     fillModalForPropertyEdition( objectId , objectPropertyName , objectPropertyType );
     document.getElementById("myModal").style.display = "block";
 
@@ -302,17 +301,176 @@
   }
 
   function fillModalForPropertyEdition(objectid , propertyName , propertyType ){
+    var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title">Edit <b>'+propertyName+'</b> Property  </h4>';
+    modalContent     += '   </div> ';
+    
+    modalContent     += '   <div class="modal-body">';
+    
+    modalContent     += '   Property Type:';
+    modalContent     += '   <select id="editPropertyType" style="color:black" " >';
+    modalContent     += '     <option value="int">int</option>';
+    modalContent     += '     <option value="string">string</option>';
+    modalContent     += '   </select>';
+    //modalContent     += '     Property Type: <input id="editPropertyType"   style="color:black" value="'+propertyType+'"  type="string" ></input>';
+    
+
+    modalContent     += '     <span style="padding-left: 5px;" >';
+    modalContent     += '       Property Name: <input id="editPropertyName" style="color:black" value="'+propertyName+'"  type="string" ></input>';
+    modalContent     += '     </span>';
+    modalContent     += '   </div>';
+
+    modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <div id="propertyEditAlert" style="color:red" ></div>';
+    modalContent     += '     <button onclick="acceptProeprtyEdit()" type="button" class="btn btn-default" data-dismiss="modal">Accept</button>';
+    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+    modalContent     += '   </div>';
+
+    document.getElementById("myModal").innerHTML = modalContent;
+    $('#editPropertyType').val(propertyType);
+  }
+
+  function acceptProeprtyEdit(){
+    var valid = true;
+    var newName = $('#editPropertyName').val();
+    var newType = $('#editPropertyType').val();
+    var objectProperties = getPropertiesFromMasterDataFor(objectEditing);
+    for(var i = 0; i < objectProperties.length ; i++){
+      if( objectProperties[i].name != oldPropertyName && objectProperties[i].type != oldPropertyType  && objectProperties[i].name == newName && objectProperties[i].type == newType ){
+        valid = false;
+      }
+    }
+
+    if(valid){
+      updatePropertyFromMasterData(objectEditing , oldPropertyType , oldPropertyName , newType , newName);
+      document.getElementById("draggableDiv_"+objectEditing).innerHTML = getDraggaleDivHtmlFor(objectEditing);
+      closeModal();
+    }else{
+      $('#propertyEditAlert')[0].innerHTML = 'The property values already exist.';
+    }
 
   }
 
-  function fillModalForMethodEdition(objectid , methodName ){
-
+  function openEditMethod( objectId , objectMethodName , params ){
+    objectEditing = objectId;
+    oldMethodName = objectMethodName;
+    newMethodParams = params;
+    
+    fillModalForMethodEdition( objectId , objectMethodName , params );
+    document.getElementById("myModal").style.display = "block";
   }
+
+
+  function fillModalForMethodEdition(objectid , methodName , methodParams ){
+    
+    var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title">Edit <b>'+methodName+'</b> Method</h4>';
+    modalContent     += '   </div> ';
+    
+    modalContent     += '   <div class="modal-body">';
+    
+    modalContent     += '     <span style="padding-left: 5px;" >';
+    modalContent     += '       Property Name: <input id="editMethodName" style="color:black" value="'+methodName+'"  type="string" ></input>';
+    modalContent     += '     </span>';
+    
+    //modalContent     += ''
+    modalContent     += '<br/>Parameters: ';
+    modalContent     += '   <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="showNewParamSection()" ></span> ';
+    modalContent     += '   <div id="newParamSection" style="display:none">';
+    modalContent     += '     <input id="newParamInput" style="color:black" type="text"/>';
+    modalContent     += '     <span style="cursor:pointer" class="glyphicon glyphicon-ok-sign"      onclick="addParamForMethod()" ></span>';
+    modalContent     += '     <span style="cursor:pointer" class="glyphicon glyphicon-remove-sign"  onclick="hideNewParamSection()" ></span>';
+    modalContent     += '     <div id="newParamErrorMessage" style="color:red" ></div>';
+    modalContent     += '   </div>';
+    modalContent     += '<div style="background-color:white;min-height:20px;">';
+    modalContent     += '<ul id="methodEditParamsList" style="color:black" >';
+    modalContent     += getParamListInnerHtml(methodParams);
+    modalContent     += '</ul> ';
+    modalContent     += '</div>';
+
+    modalContent     += '   </div>';
+
+    modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <div id="methodEditAlert" style="color:red" ></div>';
+    modalContent     += '     <button onclick="acceptMethodEdit()" type="button" class="btn btn-default" data-dismiss="modal">Accept</button>';
+    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+    modalContent     += '   </div>';
+
+    document.getElementById("myModal").innerHTML = modalContent;
+    
+  }
+
+  function showNewParamSection(){
+    $('#newParamSection')[0].style.display = 'block';
+    $('#newParamErrorMessage')[0],innerHTML = '';
+  }
+
+  function hideNewParamSection(){
+    $('#newParamSection')[0].style.display = 'none';
+  }
+
+  function addParamForMethod(){
+    var newParamName = $('#newParamInput').val();
+    if(newParamName != undefined && newParamName != null && newParamName != ''){
+      var valid = true;
+      for(var i = 0; i < newMethodParams.length; i++){
+        if(newMethodParams[i] == newParamName){
+          valid = false;
+        }
+      }
+
+      if(valid){
+        newMethodParams.push(newParamName);
+        $('#methodEditParamsList')[0].innerHTML = getParamListInnerHtml(newMethodParams);
+      }else{
+        $('#newParamErrorMessage')[0],innerHTML = 'Cannot add repeated parameter';
+      }
+
+    }
+    //objectEditing
+    //oldMethodName
+    //newMethodParams
+  }
+
+  function removeParamFromMethodEditList(aparaName){
+    newMethodParams.splice( newMethodParams.indexOf('aparaName'), 1 );
+    $('#methodEditParamsList')[0].innerHTML = getParamListInnerHtml(newMethodParams);
+  }
+
+  function getParamListInnerHtml(aParamsList){
+    var result = '';
+    for(var i = 0; i < aParamsList.length ; i++){
+      result += '<li style="display:inline;border-radius: 20px;border: 1px solid;" ><span style="cursor:pointer" class="glyphicon glyphicon-remove" onclick="removeParamFromMethodEditList(\''+aParamsList[i]+'\')" >'+aParamsList[i]+'</li>';
+    }
+    return result;
+  }
+
+  function acceptMethodEdit(){
+    var valid = true;
+    var newName = $('#editMethodName').val();
+    
+    var objectMethods = getMethodsFromMasterDataFor(objectEditing);
+
+    for(var i = 0; i < objectMethods.length ; i++){
+      if( objectMethods[i].name != oldMethodName && objectProperties[i].name == newName ){
+        valid = false;
+      }
+    }
+
+    if(valid){
+      updateMethodFromMasterData(objectEditing , oldMethodName , newName , []);
+      document.getElementById("draggableDiv_"+objectEditing).innerHTML = getDraggaleDivHtmlFor(objectEditing);
+      closeModal();
+    }else{
+      $('#propertyEditAlert')[0].innerHTML = 'The property values already exist.';
+    }
+    
+  }
+
 
   function fillModalForNameEdition(objectid ){
 
   }
-
 
   function closeModal(){
     document.getElementById("myModal").style.display = "none";

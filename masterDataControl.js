@@ -37,11 +37,17 @@ function removePropertyFromMasterData(objectId , propertyType , propertyName){
     var newPropList = [];
     for(var i = 0 ; i < master.objects[objectId].properties.length ; i++){
         if(!(master.objects[objectId].properties[i].type == propertyType && master.objects[objectId].properties[i].name == propertyName )){
-        	newPropList.push(master.objects[objectId].properties[i]);
+            newPropList.push(master.objects[objectId].properties[i]);
         }
     }
     master.objects[objectId].properties = newPropList;
 }
+
+function updatePropertyFromMasterData(objectId , oldPropertyType , oldPropertyName , newPropertyType , newPropertyName){
+    removePropertyFromMasterData(objectId , oldPropertyType , oldPropertyName);
+    addPropertyToMasterData(objectId , newPropertyType , newPropertyName);
+}
+
 
 function addMethodToMasterData(objectId , methodName , params ){
     var newMethod = {};
@@ -59,6 +65,11 @@ function removeMethodFromMasterData(objectId , methodName ){
         }
     }
     master.objects[objectId].methods = newMethodsList;
+}
+
+function updateMethodFromMasterData(objectId , oldMethodName , newMethodName , newMethodParams){
+    removeMethodFromMasterData(objectId , oldMethodName);
+    addMethodToMasterData(objectId , newMethodName , newMethodParams);
 }
 
 function restoreObjectToOriginal(objectId){
