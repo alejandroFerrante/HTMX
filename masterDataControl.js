@@ -76,6 +76,10 @@ function restoreObjectToOriginal(objectId){
     master.objects[objectId] = originalMaster.objects[objectId];   
 }
 
+function deleteObjectFromMasterData(objectId){
+    delete master.objects[objectId];
+}
+
 function getPropertiesFromMasterDataFor(objectId){
 	return master.objects[objectId].properties;
 }

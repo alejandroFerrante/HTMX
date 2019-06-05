@@ -1,4 +1,11 @@
 <!-- git pull |  git add .  && git commit -m "someMessage" && git push origin master -->
+<!-- 
+  TODO
+
+  add method
+  add property
+  add object
+-->
 <!DOCTYPE html>
 <meta charset="utf-8"/>
 <html>
@@ -117,7 +124,7 @@
     <div class="upperPannel">
         <div class="upperPannelContent" style="display:none">
           <button class="dataSaveButton" >Save Master Data</button>
-          <button class="objectCreateButton" >Create New Object</button>
+          <button class="objectCreateButton" onclick="openAddNewObject()" >Create New Object</button>
         </div>
     </div>  
     
@@ -188,8 +195,9 @@
     strList +=    '   <div class="panel-body">';
     strList +=    '    <ul>';
     for(var i = 0 ; i < master.lastID + 1 ; i++){
-      //console.log(master.objects[i].name);
+      if(master.objects[i] != undefined && master.objects[i] != null){
       strList +=  '     <li><input type="checkbox" class="showObjCheckbox" onclick="objectSelected(this.checked , '+master.objects[i].id+')" ></input>'+master.objects[i].name+'</li>';
+      }
     }
     strList +=    '   </ul>';
     strList +=    '  </div>';
@@ -218,7 +226,13 @@
     var objectProperties = getPropertiesFromMasterDataFor(objectId);
     var objectMethods = getMethodsFromMasterDataFor(objectId);
 
-    var strObj = '   <div class="dragObjHeader" ><span style="cursor: pointer" class="glyphicon glyphicon-fast-backward" onclick="doRestore(\''+objectId+'\')">    '+getObjectNameFromMasterDataFor(objectId)+'</div>';
+    var strObj = '  <div class="dragObjHeader" >';
+    strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-fast-backward" onclick="doRestore(\''+objectId+'\')"></span>';
+    strObj +=    '    <b>'+getObjectNameFromMasterDataFor(objectId)+'</b>';
+    strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEditName( \''+objectId+'\' )" ></span>';
+    strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="openConfirmDeleteObject( \''+objectId+'\' )" ></span>';
+    strObj +=    '  </div>';
+
     strObj += '   <div class="dragObjSubHeader" > Properties  <span style="cursor: cell" class="glyphicon glyphicon-plus"></span> </div>';
     
     if(objectProperties.length > 0 ){
@@ -236,7 +250,15 @@
       strObj += '   <div>';
       strObj += '   <ul>';
       for(var i = 0 ; i < objectMethods.length ; i++){
-        strObj += '<ul>'+objectMethods[i].name+'  <span style="cursor:pointer" class="glyphicon glyphicon-edit" onclick="openEditMethod( \''+objectId+'\' ,  \''+objectMethods[i].name+'\'  , '+JSON.stringify(objectMethods[i].params)+' )" ></span>  <span style="cursor:pointer" class="glyphicon glyphicon-trash" onclick="removeMethodFromObject( \''+objectId+'\'  , \''+objectMethods[i].name+'\' )" ></span>  </ul>';
+        strObj += '<ul>'+objectMethods[i].name+'  <span style="cursor:pointer" class="glyphicon glyphicon-edit" onclick="openEditMethod( \''+objectId+'\' ,  \''+objectMethods[i].name+'\'  , [';
+        //objectMethods[i].params)
+        for(var j = 0; j < objectMethods[i].params.length; j++){
+          if(j != 0){
+            strObj += ' , ';
+          }
+          strObj += '\''+objectMethods[i].params[j]+'\'';
+        }
+        strObj += '] )" ></span>  <span style="cursor:pointer" class="glyphicon glyphicon-trash" onclick="removeMethodFromObject( \''+objectId+'\'  , \''+objectMethods[i].name+'\' )" ></span>  </ul>';
       }
       strObj += '   </div>';
     }
@@ -289,6 +311,7 @@
   
   var newName;
 
+  //EDIT PROPERTY
   function openEditProperty( objectId , objectPropertyName , objectPropertyType ){
     
     objectEditing = objectId;
@@ -350,7 +373,10 @@
     }
 
   }
+  //
 
+
+  //EDIT METHOD
   function openEditMethod( objectId , objectMethodName , params ){
     objectEditing = objectId;
     oldMethodName = objectMethodName;
@@ -423,13 +449,10 @@
         newMethodParams.push(newParamName);
         $('#methodEditParamsList')[0].innerHTML = getParamListInnerHtml(newMethodParams);
       }else{
-        $('#newParamErrorMessage')[0],innerHTML = 'Cannot add repeated parameter';
+        $('#newParamErrorMessage')[0].innerHTML = 'Cannot add repeated parameter';
       }
 
     }
-    //objectEditing
-    //oldMethodName
-    //newMethodParams
   }
 
   function removeParamFromMethodEditList(aparaName){
@@ -458,7 +481,7 @@
     }
 
     if(valid){
-      updateMethodFromMasterData(objectEditing , oldMethodName , newName , []);
+      updateMethodFromMasterData(objectEditing , oldMethodName , newName , newMethodParams);
       document.getElementById("draggableDiv_"+objectEditing).innerHTML = getDraggaleDivHtmlFor(objectEditing);
       closeModal();
     }else{
@@ -466,11 +489,76 @@
     }
     
   }
+  //
 
 
-  function fillModalForNameEdition(objectid ){
+  //EDIT NAME
+  function openEditName(objectId){
+   var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title"> Edit Object Name </h4>';
+    modalContent     += '   </div> ';
+
+    modalContent     += '   <div class="modal-body">';
+    modalContent     += '       <input id="nameEditInput" style="color:black;" value="'+getObjectNameFromMasterDataFor(objectId)+'">  ';
+    modalContent     += '   </div>';
+    
+    modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <button onclick="acceptObjectNameEdit('+objectId+')" type="button" class="btn btn-default" data-dismiss="modal">Yes</button>';
+    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">No</button>';
+    modalContent     += '   </div>';
+
+    document.getElementById("myModal").innerHTML = modalContent;
+    document.getElementById("myModal").style.display = "block"; 
+  }
+
+  function acceptObjectNameEdit(objectId){
 
   }
+
+  //
+
+  //NEW OBJECT
+  function openAddNewObject(objectid){
+
+  }
+
+  //NEW PROPERTY
+  function openAddNewProperty(objectid){
+
+  }
+  //
+
+  //NEW METHOD
+
+  //
+
+  //DELETE OBJECT
+  function openConfirmDeleteObject(objectId){
+   var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title">'+getObjectNameFromMasterDataFor(objectId)+'</h4>';
+    modalContent     += '   </div> ';
+
+    modalContent     += '   <div class="modal-body">';
+    modalContent     += '       Are you sure you want to delete this object?  ';
+    modalContent     += '   </div>';
+    
+    modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <button onclick="acceptObjectDelete('+objectId+')" type="button" class="btn btn-default" data-dismiss="modal">Yes</button>';
+    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">No</button>';
+    modalContent     += '   </div>';
+
+    document.getElementById("myModal").innerHTML = modalContent;
+    document.getElementById("myModal").style.display = "block";
+  }
+
+  function acceptObjectDelete(objectId){
+    deleteObjectFromMasterData(objectId);
+    removeObjectFromCanvas(objectId);
+    fillObjectsList();
+    closeModal();
+  }
+  //
+
 
   function closeModal(){
     document.getElementById("myModal").style.display = "none";
