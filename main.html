@@ -2,9 +2,7 @@
 <!-- 
   TODO
 
-  add method
-  add property
-  add object
+  verify add/edit method
 -->
 <!DOCTYPE html>
 <meta charset="utf-8"/>
@@ -177,7 +175,17 @@
   
   function objectSelected(isChecked , objectId){
     if(isChecked){
-      addObjectToCanvas(objectId)
+      addObjectToCanvas(objectId);
+
+      //make objects being shown draggable
+      var lastusedId = getLastIdFromMasterData();
+      var selectedObjects = [];  
+      for(var i = 0; i < lastusedId+1 ; i++ ){
+        if($('#objectCheckBox_'+i)[0] != undefined && $('#objectCheckBox_'+i)[0] != null && $('#objectCheckBox_'+i)[0].checked){
+          dragElement(document.getElementById("draggableDiv_"+i));
+        }
+      }
+
     }else{
       removeObjectFromCanvas(objectId);
     }
@@ -194,9 +202,10 @@
     strList +=    '   <div class="panel-heading">Objects</div>';
     strList +=    '   <div class="panel-body">';
     strList +=    '    <ul>';
-    for(var i = 0 ; i < master.lastID + 1 ; i++){
+    var lastusedId = getLastIdFromMasterData();
+    for(var i = 0 ; i < (lastusedId + 1) ; i++){
       if(master.objects[i] != undefined && master.objects[i] != null){
-      strList +=  '     <li><input type="checkbox" class="showObjCheckbox" onclick="objectSelected(this.checked , '+master.objects[i].id+')" ></input>'+master.objects[i].name+'</li>';
+      strList +=  '     <li><input type="checkbox" class="showObjCheckbox" id="objectCheckBox_'+i+'" onclick="objectSelected(this.checked , '+master.objects[i].id+')" ></input> <span id="objectListName_'+i+'">'+master.objects[i].name+'</span></li>';
       }
     }
     strList +=    '   </ul>';
@@ -228,12 +237,12 @@
 
     var strObj = '  <div class="dragObjHeader" >';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-fast-backward" onclick="doRestore(\''+objectId+'\')"></span>';
-    strObj +=    '    <b>'+getObjectNameFromMasterDataFor(objectId)+'</b>';
+    strObj +=    '    <b><span id="objectNameTitle_'+objectId+'">'+getObjectNameFromMasterDataFor(objectId)+'</b>';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEditName( \''+objectId+'\' )" ></span>';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="openConfirmDeleteObject( \''+objectId+'\' )" ></span>';
     strObj +=    '  </div>';
 
-    strObj += '   <div class="dragObjSubHeader" > Properties  <span style="cursor: cell" class="glyphicon glyphicon-plus"></span> </div>';
+    strObj += '   <div class="dragObjSubHeader" > Properties  <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="openAddNewProperty('+objectId+')"></span> </div>';
     
     if(objectProperties.length > 0 ){
       strObj += '   <div>';
@@ -244,7 +253,7 @@
       strObj += '   </div>';
     }
 
-    strObj += '   <div class="dragObjSubHeader" >   Methods   <span style="cursor: cell" class="glyphicon glyphicon-plus"></span>  </div>';
+    strObj += '   <div class="dragObjSubHeader" >   Methods   <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="openAddNewMethod('+objectId+')"></span>  </div>';
 
     if(objectMethods.length > 0 ){
       strObj += '   <div>';
@@ -268,7 +277,9 @@
 
   function removeObjectFromCanvas(objectId){
     var element = document.getElementById("draggableDiv_"+objectId);
-    element.parentNode.removeChild(element); 
+    if(element != undefined && element != null && element.parentNode != undefined && element.parentNode!= null ){
+      element.parentNode.removeChild(element); 
+    }
   }
 
 
@@ -396,7 +407,7 @@
     modalContent     += '   <div class="modal-body">';
     
     modalContent     += '     <span style="padding-left: 5px;" >';
-    modalContent     += '       Property Name: <input id="editMethodName" style="color:black" value="'+methodName+'"  type="string" ></input>';
+    modalContent     += '       Method Name: <input id="editMethodName" style="color:black" value="'+methodName+'"  type="string" ></input>';
     modalContent     += '     </span>';
     
     //modalContent     += ''
@@ -475,7 +486,7 @@
     var objectMethods = getMethodsFromMasterDataFor(objectEditing);
 
     for(var i = 0; i < objectMethods.length ; i++){
-      if( objectMethods[i].name != oldMethodName && objectProperties[i].name == newName ){
+      if( objectMethods[i].name != oldMethodName && objectMethods[i].name == newName ){
         valid = false;
       }
     }
@@ -503,6 +514,7 @@
     modalContent     += '   </div>';
     
     modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <div id="editNameErrorMessage" style="color:red" ></div>';
     modalContent     += '     <button onclick="acceptObjectNameEdit('+objectId+')" type="button" class="btn btn-default" data-dismiss="modal">Yes</button>';
     modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">No</button>';
     modalContent     += '   </div>';
@@ -512,6 +524,28 @@
   }
 
   function acceptObjectNameEdit(objectId){
+    var newName = $('#nameEditInput').val();
+    var oldName = getObjectNameFromMasterDataFor(objectId);
+    var isValid = true;
+
+    var objectsNamesList = getAllObjectNames();
+
+    for(var i = 0; i < objectsNamesList.length; i++){
+      if(objectsNamesList[i] != oldName && objectsNamesList[i] == newName  ){
+        isValid = false;
+      }
+    }
+
+    if(isValid){
+      updateObjectNameFromMasterData(objectId , newName);
+      closeModal();
+      $('#objectNameTitle_'+objectId)[0].innerHTML = newName;
+      $('#objectListName_'+objectId)[0].innerHTML = newName;
+      //var selectedObjects = [];
+      //fillObjectsList();
+    }else{
+      $('#editNameErrorMessage')[0].innerHTML = 'An object with same name already exists!';
+    }
 
   }
 
@@ -519,17 +553,186 @@
 
   //NEW OBJECT
   function openAddNewObject(objectid){
+    var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title"> New Object Name </h4>';
+    modalContent     += '   </div> ';
+
+    modalContent     += '   <div class="modal-body">';
+    modalContent     += '       <input id="newObjectNameInput" style="color:black;" value="">  ';
+    modalContent     += '   </div>';
+    
+    modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <div id="newObjectErrorMessage" style="color:red" ></div>';
+    modalContent     += '     <button onclick="acceptNewObject()" type="button" class="btn btn-default" data-dismiss="modal">Yes</button>';
+    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">No</button>';
+    modalContent     += '   </div>';
+
+    document.getElementById("myModal").innerHTML = modalContent;
+    document.getElementById("myModal").style.display = "block"; 
+  }
+
+  function acceptNewObject(){
+    var newName = $('#newObjectNameInput').val();
+    var isValid = true;
+
+    var objectsNamesList = getAllObjectNames();
+
+    if(newName == undefined || newName == null || newName == ''){
+      $('#newObjectErrorMessage')[0].innerHTML = 'Invalid Name';
+    }else{
+      for(var i = 0; i < objectsNamesList.length; i++){
+        if(objectsNamesList[i] == newName  ){
+          isValid = false;
+        }
+      }
+
+      if(isValid){
+        var lastusedId = getLastIdFromMasterData();
+        var selectedObjects = [];
+        for(var i = 0; i < lastusedId+1 ; i++ ){
+          if($('#objectCheckBox_'+i)[0] != undefined && $('#objectCheckBox_'+i)[0] != null && $('#objectCheckBox_'+i)[0].checked){
+            selectedObjects.push(i);
+          }
+        }
+
+        insertObjectWithNameToMasterData(newName);
+        closeModal();
+        fillObjectsList();
+        for(var i = 0; i < selectedObjects.length ; i++){
+          $('#objectCheckBox_'+i)[0].checked = true;
+          dragElement(document.getElementById("draggableDiv_"+i));
+        }
+        
+
+      }else{
+        $('#newObjectErrorMessage')[0].innerHTML = 'An object with same name already exists!';
+      }
+    }
 
   }
 
+  //
+
   //NEW PROPERTY
-  function openAddNewProperty(objectid){
+  function openAddNewProperty(objectId ){
+    var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title"> New Property </h4>';
+    modalContent     += '   </div> ';
+    
+    modalContent     += '   <div class="modal-body">';
+    
+    modalContent     += '   Property Type:';
+    modalContent     += '   <select id="newPropertyType" style="color:black" " >';
+    modalContent     += '     <option value="int">int</option>';
+    modalContent     += '     <option value="string">string</option>';
+    modalContent     += '   </select>';
+    //modalContent     += '     Property Type: <input id="editPropertyType"   style="color:black" value="'+propertyType+'"  type="string" ></input>';
+    
+
+    modalContent     += '     <span style="padding-left: 5px;" >';
+    modalContent     += '       Property Name: <input id="newPropertyName" style="color:black" value=""  type="string" ></input>';
+    modalContent     += '     </span>';
+    modalContent     += '   </div>';
+
+    modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <div id="newPropertyErrorMessage" style="color:red" ></div>';
+    modalContent     += '     <button onclick="acceptNewProeprty('+objectId+')" type="button" class="btn btn-default" data-dismiss="modal">Accept</button>';
+    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+    modalContent     += '   </div>';
+
+    document.getElementById("myModal").innerHTML = modalContent;
+    document.getElementById("myModal").style.display = 'block';
+  }
+
+  function acceptNewProeprty(objectId){
+    var newPropertyName = $('#newPropertyName').val();
+    var newPropertyType = $('#newPropertyType').val();
+    var objectProperties  = getPropertiesFromMasterDataFor(objectId);
+    var isValid = true;
+
+    for(var i = 0; i < objectProperties.length ; i++ ){
+      if(objectProperties[i].name == newPropertyName && objectProperties[i].type == newPropertyType ){
+        isValid = false;
+      }
+    }
+
+    if(isValid){
+      addPropertyToMasterData(objectId , newPropertyType , newPropertyName);
+      document.getElementById("draggableDiv_"+objectId).innerHTML = getDraggaleDivHtmlFor(objectId);
+      closeModal();
+    }else{
+     $('#newPropertyErrorMessage')[0].innerHTML = 'The property already exists in the object!';
+    }
+
 
   }
   //
 
   //NEW METHOD
+  function openAddNewMethod(objectId){
+    fillModalForNewMethod( objectId );
+    document.getElementById("myModal").style.display = "block";
+    newMethodParams = [];
+  }
 
+
+  function fillModalForNewMethod( objectId ){
+    
+    var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title">New Method</h4>';
+    modalContent     += '   </div> ';
+    
+    modalContent     += '   <div class="modal-body">';
+    
+    modalContent     += '     <span style="padding-left: 5px;" >';
+    modalContent     += '       Method Name: <input id="newMethodName" style="color:black" value=""  type="string" ></input>';
+    modalContent     += '     </span>';
+    
+    //modalContent     += ''
+    modalContent     += '<br/>Parameters: ';
+    modalContent     += '   <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="showNewParamSection()" ></span> ';
+    modalContent     += '   <div id="newParamSection" style="display:none">';
+    modalContent     += '     <input id="newParamInput" style="color:black" type="text"/>';
+    modalContent     += '     <span style="cursor:pointer" class="glyphicon glyphicon-ok-sign"      onclick="addParamForMethod()" ></span>';
+    modalContent     += '     <span style="cursor:pointer" class="glyphicon glyphicon-remove-sign"  onclick="hideNewParamSection()" ></span>';
+    modalContent     += '     <div id="newParamErrorMessage" style="color:red" ></div>';
+    modalContent     += '   </div>';
+    modalContent     += '<div style="background-color:white;min-height:20px;">';
+    modalContent     += '<ul id="methodEditParamsList" style="color:black" >';
+    modalContent     += '</ul> ';
+    modalContent     += '</div>';
+
+    modalContent     += '   </div>';
+
+    modalContent     += '   <div class="modal-footer">';
+    modalContent     += '     <div id="methodEditAlert" style="color:red" ></div>';
+    modalContent     += '     <button onclick="acceptNewMethod('+objectId+')" type="button" class="btn btn-default" data-dismiss="modal">Accept</button>';
+    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+    modalContent     += '   </div>';
+
+    document.getElementById("myModal").innerHTML = modalContent;
+    
+  }
+
+  function acceptNewMethod(objectId){
+    var valid = true;
+    var newName = $('#newMethodName').val();
+    var objectMethods = getMethodsFromMasterDataFor(objectId);
+
+    for(var i = 0; i < objectMethods.length ; i++){
+      if( objectMethods[i].name == newName ){
+        valid = false;
+      }
+    }
+
+    if(valid){
+      addMethodToMasterData(objectId , newName , newMethodParams);
+      document.getElementById("draggableDiv_"+objectId).innerHTML = getDraggaleDivHtmlFor(objectId);
+      closeModal();
+    }else{
+      $('#methodEditAlert')[0].innerHTML = 'The method already exist in the object.';
+    }
+  }
   //
 
   //DELETE OBJECT

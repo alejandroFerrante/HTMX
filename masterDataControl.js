@@ -72,6 +72,20 @@ function updateMethodFromMasterData(objectId , oldMethodName , newMethodName , n
     addMethodToMasterData(objectId , newMethodName , newMethodParams);
 }
 
+function updateObjectNameFromMasterData(objectId , newName){
+    master.objects[objectId].name = newName;
+}
+
+function insertObjectWithNameToMasterData( newName){
+    master.lastID += 1;
+    var newObject = {};
+    newObject.id = master.lastID;
+    newObject.name = newName;
+    newObject.methods = [];
+    newObject.properties = [];
+    master.objects[master.lastID] = newObject;
+}
+
 function restoreObjectToOriginal(objectId){
     master.objects[objectId] = originalMaster.objects[objectId];   
 }
@@ -90,4 +104,18 @@ function getMethodsFromMasterDataFor(objectId){
 
 function getObjectNameFromMasterDataFor(objectId){
 	return master.objects[objectId].name;
+}
+
+function getLastIdFromMasterData(){
+    return master.lastID;
+}
+
+function getAllObjectNames(){
+    var result = [];
+    for(var i = 0; i < master.lastID + 1 ; i++ ){
+        if(master.objects[i] != undefined && master.objects[i] != null){
+            result.push(master.objects[i].name);
+        }
+    }
+    return result;
 }
