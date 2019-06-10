@@ -111,7 +111,7 @@
     <div class="leftPannel">
       
       <div class="loadData">
-        <button class="dataLoadButton" >Load Master Data</button>
+        <button style="font-size:20px;" class="dataLoadButton" >Load Master Data</button>
       </div>
 
       <div class="objectsShowList">
@@ -121,8 +121,8 @@
     
     <div class="upperPannel">
         <div class="upperPannelContent" style="display:none">
-          <button class="dataSaveButton" >Save Master Data</button>
-          <button class="objectCreateButton" onclick="openAddNewObject()" >Create New Object</button>
+          <button style="font-size:20px;" class="dataSaveButton" >Save Master Data</button>
+          <button style="font-size:20px;" class="objectCreateButton" onclick="openAddNewObject()" >Create New Object</button>
         </div>
     </div>  
     
@@ -205,7 +205,7 @@
     var lastusedId = getLastIdFromMasterData();
     for(var i = 0 ; i < (lastusedId + 1) ; i++){
       if(master.objects[i] != undefined && master.objects[i] != null){
-      strList +=  '     <li><input type="checkbox" class="showObjCheckbox" id="objectCheckBox_'+i+'" onclick="objectSelected(this.checked , '+master.objects[i].id+')" ></input> <span id="objectListName_'+i+'">'+master.objects[i].name+'</span></li>';
+      strList +=  '     <li><input type="checkbox" class="showObjCheckbox" id="objectCheckBox_'+i+'" onclick="objectSelected(this.checked , '+master.objects[i].id+')" ></input> <span id="objectListName_'+i+'" style="font-size:20px;" >'+master.objects[i].name+'</span></li>';
       }
     }
     strList +=    '   </ul>';
@@ -215,14 +215,14 @@
   }
 
   function addObjectToCanvas(objectId){
-    minDragX = 374;
+    minDragX = 360;
     maxDragX = 1056;  
     
     minDragY = 200;
-    maxDragY = 430;
+    maxDragY = 520;
 
     var strObj = '';
-    strObj += '<div id="draggableDiv_'+objectId+'" class="dragObjDiv" >';
+    strObj += '<div id="draggableDiv_'+objectId+'" class="dragObjDiv" style="width:250px; min-height:225px;" >';
     
     strObj += getDraggaleDivHtmlFor(objectId);
 
@@ -235,31 +235,31 @@
     var objectProperties = getPropertiesFromMasterDataFor(objectId);
     var objectMethods = getMethodsFromMasterDataFor(objectId);
 
-    var strObj = '  <div class="dragObjHeader" >';
+    var strObj = '  <div class="dragObjHeader" style="font-size:18px;" >';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-fast-backward" onclick="doRestore(\''+objectId+'\')"></span>';
     strObj +=    '    <b><span id="objectNameTitle_'+objectId+'">'+getObjectNameFromMasterDataFor(objectId)+'</b>';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEditName( \''+objectId+'\' )" ></span>';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="openConfirmDeleteObject( \''+objectId+'\' )" ></span>';
     strObj +=    '  </div>';
 
-    strObj += '   <div class="dragObjSubHeader" > Properties  <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="openAddNewProperty('+objectId+')"></span> </div>';
+    strObj += '   <div class="dragObjSubHeader" style="font-size: 15px;vertical-align:50%;" > Properties  <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="openAddNewProperty('+objectId+')"></span> </div>';
     
     if(objectProperties.length > 0 ){
       strObj += '   <div>';
       strObj += '   <ul>';
       for(var i = 0 ; i < objectProperties.length ; i++){
-        strObj += '<ul>  ('+objectProperties[i].type+') '+objectProperties[i].name+'  <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEditProperty( \''+objectId+'\' ,  \''+objectProperties[i].name+'\' , \''+objectProperties[i].type+'\' )" ></span>  <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="removePropertyFromObject( \''+objectId+'\' , \''+objectProperties[i].type+'\' , \''+objectProperties[i].name+'\')" ></span> </ul>';
+        strObj += '<ul style="font-size: 10px;" >  ('+objectProperties[i].type+') '+objectProperties[i].name+'  <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEditProperty( \''+objectId+'\' ,  \''+objectProperties[i].name+'\' , \''+objectProperties[i].type+'\' )" ></span>  <span style="cursor: pointer" class="glyphicon glyphicon-trash" onclick="removePropertyFromObject( \''+objectId+'\' , \''+objectProperties[i].type+'\' , \''+objectProperties[i].name+'\')" ></span> </ul>';
       }
       strObj += '   </div>';
     }
 
-    strObj += '   <div class="dragObjSubHeader" >   Methods   <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="openAddNewMethod('+objectId+')"></span>  </div>';
+    strObj += '   <div class="dragObjSubHeader" style="font-size: 15px;vertical-align:50%;" >   Methods   <span style="cursor:pointer" class="glyphicon glyphicon-plus" onclick="openAddNewMethod('+objectId+')"></span>  </div>';
 
     if(objectMethods.length > 0 ){
       strObj += '   <div>';
       strObj += '   <ul>';
       for(var i = 0 ; i < objectMethods.length ; i++){
-        strObj += '<ul>'+objectMethods[i].name+'  <span style="cursor:pointer" class="glyphicon glyphicon-edit" onclick="openEditMethod( \''+objectId+'\' ,  \''+objectMethods[i].name+'\'  , [';
+        strObj += '<ul style="font-size: 10px;" >'+objectMethods[i].name+'  <span style="cursor:pointer" class="glyphicon glyphicon-edit" onclick="openEditMethod( \''+objectId+'\' ,  \''+objectMethods[i].name+'\'  , [';
         //objectMethods[i].params)
         for(var j = 0; j < objectMethods[i].params.length; j++){
           if(j != 0){
@@ -755,10 +755,23 @@
   }
 
   function acceptObjectDelete(objectId){
+    
+    var selectedObjects = [];
+    var lastusedId = getLastIdFromMasterData();
+    for(var i = 0; i < lastusedId+1 ; i++ ){
+      if(i != objectId && $('#objectCheckBox_'+i)[0] != undefined && $('#objectCheckBox_'+i)[0] != null && $('#objectCheckBox_'+i)[0].checked){
+        selectedObjects.push(i);
+      }
+    }
+
     deleteObjectFromMasterData(objectId);
     removeObjectFromCanvas(objectId);
     fillObjectsList();
     closeModal();
+
+    for(var i = 0; i < selectedObjects.length ; i++ ){
+      $('#objectCheckBox_'+selectedObjects[i]).attr('checked', true);
+    }
   }
   //
 

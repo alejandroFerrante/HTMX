@@ -87,7 +87,9 @@ function insertObjectWithNameToMasterData( newName){
 }
 
 function restoreObjectToOriginal(objectId){
-    master.objects[objectId] = originalMaster.objects[objectId];   
+    if(originalMaster.objects[objectId] != undefined && originalMaster.objects[objectId] != null){
+        master.objects[objectId] = originalMaster.objects[objectId];
+    }
 }
 
 function deleteObjectFromMasterData(objectId){
