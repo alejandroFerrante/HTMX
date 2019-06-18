@@ -1,15 +1,22 @@
-		
-		function initIconManagement(){
+
+		var sketcher;
+		var icons = [];
+		var canvasId = 'newIconCanvas';
+		var minAmountOfIconContainers = 3;
+		var amountOfIconContainers = 3;
+		var usedIndexes;
+
+		function initIconManagement(iconsList){
 			//Init Sketcher
-			var icons = [];
-			var canvasId = 'newIconCanvas';
-			var amountOfIconContainers = 3;
-			
-			var sketcher = atrament('#'+canvasId, 100, 100);
+			sketcher = atrament('#'+canvasId, 100, 100);
 			sketcher.smoothing = true;
 			sketcher.opacity = 0.8;
 			sketcher.adaptiveStroke = true;
 			//
+
+			icons = iconsList;
+			updateUsedIndexes();
+			fillItemsSectionWithCurrentIcons()
 		}
 
 
@@ -37,10 +44,14 @@
 			result += '<th>';
 
 		    
-		    result += '	<div style="width:50px;height:50px;border-style:solid;border-width:2px" onmouseleave="hideDeleteIconFor('+index+')" onmouseenter="showDeleteIconFor('+index+')" >';
+		    result += '	<div style="width:60px;height:60px;border-style:solid;border-width:2px" ';
 		    
-		    result += '	<span align="right" id="slideRemoveIcon_'+index+'" style="cursor: pointer;display:none;" class="glyphicon glyphicon-trash" onclick="removeIcon('+index+')" ></span> ';
-		    
+		    if(! usedIndexes.has(index)){
+				result += '  onmouseleave="hideDeleteIconFor('+index+')" onmouseenter="showDeleteIconFor('+index+')" >';
+				result += '	<span align="right" id="slideRemoveIcon_'+index+'" style="cursor: pointer;display:none;color:black;" class="glyphicon glyphicon-trash" onclick="removeIcon('+index+')" ></span> ';
+			}else{
+				result += '>';	
+			}	    
 
 		    result += '		<img id="slideImageContainer_'+index+'" style="position:relative;height:100%;width:100%"/>';
 		    
@@ -52,9 +63,17 @@
 		}
 
 		function fillItemsSectionWithCurrentIcons(){
-			if(amountOfIconContainers < icons.length){
+			
+			if(amountOfIconContainers <= icons.length){
 				amountOfIconContainers = icons.length-1;
 			}
+			
+			if(amountOfIconContainers < minAmountOfIconContainers){
+				amountOfIconContainers = minAmountOfIconContainers;	
+			}
+			
+
+
 			fillItemsSection();
 			for(var i = 0; i < icons.length; i++){
 				drawIntoImage('slideImageContainer_'+i , icons[i]);
@@ -95,4 +114,12 @@
 			if(index < icons.length){
 				$('#slideRemoveIcon_'+index)[0].style.display = 'none';
 			}
+		}
+
+		function getIcons(){
+			return icons;
+		}
+
+		function updateUsedIndexes(){
+			usedIndexes = getUsedIconIndexes();
 		}

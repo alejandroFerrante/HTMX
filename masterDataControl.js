@@ -96,6 +96,10 @@ function deleteObjectFromMasterData(objectId){
     delete master.objects[objectId];
 }
 
+function getRepresentationFromMasterDataFor(objectId){
+    return master.representations[master.objects[objectId].representationIndex];
+}
+
 function getPropertiesFromMasterDataFor(objectId){
 	return master.objects[objectId].properties;
 }
@@ -120,4 +124,18 @@ function getAllObjectNames(){
         }
     }
     return result;
+}
+
+function getUsedIconIndexes(){
+    var result = new Set();
+    for(var i = 0; i < master.lastID + 1 ; i++ ){
+        if(master.objects[i] != undefined && master.objects[i] != null){
+            result.add(master.objects[i].representationIndex);
+        }
+    }
+    return result;
+}
+
+function getRepresentationsFromMasterData(){
+    return master.representations;
 }

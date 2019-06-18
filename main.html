@@ -2,7 +2,10 @@
 <!-- 
   TODO
 
-  verify add/edit method
+  asign representation on object creation
+  edit representation
+  access edit menu from object representation
+
 -->
 <!DOCTYPE html>
 <meta charset="utf-8"/>
@@ -159,6 +162,7 @@
         <div class="upperPannelContent" style="display:none">
           <button style="font-size:20px;" class="dataSaveButton" >Save Master Data</button>
           <button style="font-size:20px;" class="objectCreateButton" onclick="openAddNewObject()" >Create New Object</button>
+          <button style="font-size:20px;" onclick="showIconsModal()" >Manage Representations</button>
         </div>
     </div>  
     
@@ -186,23 +190,38 @@
 <!-- -->
 
 <!-- ICON MANAGEMENT MODAL-->
-  <div class="" style="display:block" >
-      <div class="">
+  <div id="iconsModal" class="modal" style="display:none;" >
+      
+           
+      <div class="modal-content" style="border-style:solid;border-width:2px;border-color:black;height:60%;width:100%">
+
+        <table style="width:100%;padding-left:98%;padding-bottom:1%">
+          <tr>
+            
+            <th>
+              <div style="color:black;"><h3><b>Object Representations</b></h3></div>
+            </th>
+            
+            <th>
+              <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-remove" onclick="closeIconsSection()" ></span>
+            </th>
+          </tr>
+        </table>
 
         <div id="itemsSection">
           
         </div>
 
         <div>
-          <!-- <div id="newIconSection" style="display:none;" > -->
-          <div id="newIconSection" style="display:block;" >
-            <div><b>Add New Icon</b></div>
-            <div style="width:100px;height:100px;border-style:solid;border-width:2px" >
+          
+          <div id="newIconSection" >
+            <div style="color:black" ><b>Add New Icon</b></div>
+            <div style="width:100px;height:100px;border-style:solid;border-width:2px;border-color:black" >
               <canvas id="newIconCanvas" style="cursor: crosshair;position:relative;height:100%;width:100%"></canvas>
               <div style="padding-top:5px;">
-                <button  onclick="doClear()">Clear</button>
-                <span style="cursor: pointer" class="glyphicon glyphicon-ok" onclick="addIcon()" ></span>
-                <span style="cursor: pointer" class="glyphicon glyphicon-remove" ></span>
+                <!-- <button  style="color:black;" onclick="doClear()">Clear</button> -->
+                <span style="cursor: pointer;color:black;" title="Clear" class="glyphicon glyphicon-erase" onclick="doClear()" ></span>
+                <span style="cursor: pointer;color:black;" title="Add" class="glyphicon glyphicon-plus-sign" onclick="addIcon()" ></span>
               </div>
             </div>
           </div>
@@ -215,12 +234,7 @@
 </body>
 
 <script>
-
-
-$(document).ready(function(){
-  initIconManagement();
-});
-  
+ 
 
   $("#fileInput").change(function() {
     var file = $("#fileInput")[0].files[0];
@@ -264,6 +278,7 @@ $(document).ready(function(){
     $('.loadData')[0].style = 'display:none';
     $('.upperPannelContent')[0].style = 'display:block';
     fillObjectsList();
+    initIconManagement(getRepresentationsFromMasterData());
   }
 
   function fillObjectsList(){
@@ -291,12 +306,26 @@ $(document).ready(function(){
     maxDragY = 520;
 
     var strObj = '';
-    strObj += '<div id="draggableDiv_'+objectId+'" class="dragObjDiv" style="width:250px; min-height:225px;" >';
+    strObj += '<div id="draggableDiv_'+objectId+'" class="dragObjDiv" style="width:80px;height:80px;background-color: rgba(0, 0, 0, 0);border-style: none;" >';
     
-    strObj += getDraggaleDivHtmlFor(objectId);
+    strObj += '<table style = "height:20px;">';
+    strObj += ' <tr>';
+
+    strObj += '   <th style="width:20px;" ><span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-picture" onclick="openObjectMenu()" ></span></th>';
+    strObj += '   <th style="width:20px;"><span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-pencil" onclick="openObjectMenu()" ></span></th>';
+
+    strObj += '</tr>';
+    strObj += '</table>';
+
+
+    strObj += '   <img id="objectImageContainer_'+objectId+'" style="position:relative;height:100%;width:100%"/>';
+    strObj += '   <div style="width:75%;font-size:50%" ><span id="objectNameTitle_'+objectId+'">'+getObjectNameFromMasterDataFor(objectId)+'</div>';
 
     strObj += '</div>';
     $('.canvasContainer')[0].innerHTML += strObj;
+
+    $('#objectImageContainer_'+objectId)[0].src = getRepresentationFromMasterDataFor(objectId);
+
     dragElement(document.getElementById("draggableDiv_"+objectId)); 
   }
 
@@ -847,6 +876,20 @@ $(document).ready(function(){
 
   function closeModal(){
     document.getElementById("myModal").style.display = "none";
+  }
+
+  function showIconsModal(){
+    updateUsedIndexes();
+    $('#iconsModal')[0].style.display = 'block';
+  }
+
+  function closeIconsSection(){
+    master.representations = getIcons();
+    hideIconsModal();
+  }
+
+  function hideIconsModal(){
+    $('#iconsModal')[0].style.display = 'none';
   }
 
   /*
