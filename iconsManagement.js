@@ -80,6 +80,44 @@
 			}
 		}
 
+		function fillSectionWithSelectableIcons(sectionId , objectId ){
+			
+			
+			amountOfIconContainers = icons.length-2;
+			
+			
+			
+			
+			var currentRepresentation = getRepresentationIndexFromMasterDataFor(objectId);
+
+			var htmlContent = '';
+			htmlContent += '<div style="overflow: auto;">';
+			htmlContent += '<table style="width:100%;">';
+			htmlContent += '		  <tr>';
+			for(var i= 0; i < icons.length ; i++){
+				if(i != currentRepresentation){
+					htmlContent += '<th>';
+			    	htmlContent += '	<div style="width:60px;height:60px;border-style:solid;border-width:2px" >';
+			    	htmlContent += '		<img id="repSelectImageContainer_'+i+'" onclick="acceptRepChange('+objectId+' , '+i+' )" style="cursor:pointer;position:relative;height:100%;width:100%;background-color:white;"/>';	
+			    	htmlContent += '	</div>';
+			    	htmlContent += '</th>';
+		    	}
+			}
+			htmlContent += '		  </tr>';
+			htmlContent += '</table>';
+			htmlContent += '</div>';
+
+			$('#'+sectionId)[0].innerHTML = htmlContent;
+			
+			
+			for(var i = 0; i < icons.length; i++){
+				if(i != currentRepresentation){
+					drawIntoImage('repSelectImageContainer_'+i , icons[i]);
+				}
+			}
+			
+		}
+
 		function addIcon(){
 			icons.push(getCanvasBase64(canvasId));
 			fillItemsSectionWithCurrentIcons();
@@ -122,4 +160,11 @@
 
 		function updateUsedIndexes(){
 			usedIndexes = getUsedIconIndexes();
+		}
+
+		var repEditedObjectid;
+		function acceptRepChange(objectId , newindex){
+			updateRepresentationForObjectFromMasterData(objectId , newindex);
+			repEditedObjectid = objectId;
+			$(this).trigger( "repEditFinished" );
 		}

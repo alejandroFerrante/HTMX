@@ -76,6 +76,10 @@ function updateObjectNameFromMasterData(objectId , newName){
     master.objects[objectId].name = newName;
 }
 
+function updateRepresentationForObjectFromMasterData(objectId , newIndex){
+    master.objects[objectId].representationIndex = newIndex;
+}
+
 function insertObjectWithNameToMasterData( newName){
     master.lastID += 1;
     var newObject = {};
@@ -98,6 +102,10 @@ function deleteObjectFromMasterData(objectId){
 
 function getRepresentationFromMasterDataFor(objectId){
     return master.representations[master.objects[objectId].representationIndex];
+}
+
+function getRepresentationIndexFromMasterDataFor(objectId){
+    return master.objects[objectId].representationIndex;
 }
 
 function getPropertiesFromMasterDataFor(objectId){

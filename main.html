@@ -1,10 +1,15 @@
 <!-- git pull |  git add .  && git commit -m "someMessage" && git push origin master -->
 <!-- 
   TODO
-
+  
+  Stage 1
+  when delete representations, rearrange indexes
+  bug: select deletable icons correctly
   asign representation on object creation
-  edit representation
-  access edit menu from object representation
+  
+  Stage 2
+  collaborators
+
 
 -->
 <!DOCTYPE html>
@@ -255,6 +260,10 @@
     onMasterDataLoaded();
   });
 
+  $( this ).on( "repEditFinished", function() {
+    onMasterRepEditFinished(repEditedObjectid);
+  });
+
   
   function objectSelected(isChecked , objectId){
     if(isChecked){
@@ -307,20 +316,9 @@
 
     var strObj = '';
     strObj += '<div id="draggableDiv_'+objectId+'" class="dragObjDiv" style="width:80px;height:80px;background-color: rgba(0, 0, 0, 0);border-style: none;" >';
+
+    strObj += getObjectHTML(objectId);
     
-    strObj += '<table style = "height:20px;">';
-    strObj += ' <tr>';
-
-    strObj += '   <th style="width:20px;" ><span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-picture" onclick="openObjectMenu()" ></span></th>';
-    strObj += '   <th style="width:20px;"><span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-pencil" onclick="openObjectMenu()" ></span></th>';
-
-    strObj += '</tr>';
-    strObj += '</table>';
-
-
-    strObj += '   <img id="objectImageContainer_'+objectId+'" style="position:relative;height:100%;width:100%"/>';
-    strObj += '   <div style="width:75%;font-size:50%" ><span id="objectNameTitle_'+objectId+'">'+getObjectNameFromMasterDataFor(objectId)+'</div>';
-
     strObj += '</div>';
     $('.canvasContainer')[0].innerHTML += strObj;
 
@@ -329,11 +327,34 @@
     dragElement(document.getElementById("draggableDiv_"+objectId)); 
   }
 
+  function getObjectHTML(objectId){
+    var strHTML = '';
+    strHTML += '   <img id="objectImageContainer_'+objectId+'" style="position:relative;height:100%;width:100%"/>';
+    
+    strHTML += '   <div style="width:75%;font-size:50%" > ';
+    
+    strHTML += '       <table style = "height:20px;">';
+    strHTML += '         <tr>';
+    strHTML += '         <th>';
+    strHTML += '           <span id="objectNameTitle_'+objectId+'">'+getObjectNameFromMasterDataFor(objectId);
+    strHTML += '         </th>';
+    strHTML += '         <th>';
+    strHTML += '           <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-picture" onclick="openEditRepresentation('+objectId+')" ></span>';
+    strHTML += '           <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-pencil" onclick="openObjectMenu('+objectId+')" ></span>';
+    strHTML += '         </th>';
+    strHTML += '         </tr>';
+    strHTML += '       </table>';
+
+    strHTML += '   </div>';
+    return strHTML;
+  }
+
   function getDraggaleDivHtmlFor(objectId){
     var objectProperties = getPropertiesFromMasterDataFor(objectId);
     var objectMethods = getMethodsFromMasterDataFor(objectId);
 
     var strObj = '  <div class="dragObjHeader" style="font-size:18px;" >';
+    strObj +=    '    <div align="right" ><span style="cursor: pointer;" class="glyphicon glyphicon-remove" onclick="closeObjectEdit( '+objectId+')" ></span></div>';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-fast-backward" onclick="doRestore(\''+objectId+'\')"></span>';
     strObj +=    '    <b><span id="objectNameTitle_'+objectId+'">'+getObjectNameFromMasterDataFor(objectId)+'</b>';
     strObj +=    '    <span style="cursor: pointer" class="glyphicon glyphicon-edit" onclick="openEditName( \''+objectId+'\' )" ></span>';
@@ -646,7 +667,30 @@
     }
 
   }
+  //
 
+  //EDIT REPRESENTATION
+  function openEditRepresentation(objectId){
+    var modalContent =  '   <div class="modal-header">';
+    modalContent     += '     <h4 class="modal-title"> Select new Representation for Object </h4>';
+    modalContent     += '     <div> <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-remove"/> </div>';
+    modalContent     += '   </div> ';
+
+    modalContent     += '   <div id="editRepresentationSection" class="modal-body">';
+    
+    modalContent     += '   </div>';
+    document.getElementById("myModal").innerHTML = modalContent;
+
+    fillSectionWithSelectableIcons('editRepresentationSection' , objectId);
+
+    document.getElementById("myModal").style.display = "block"; 
+  }
+
+  function onMasterRepEditFinished(objectId){
+    $('#draggableDiv_'+objectId)[0].innerHTML = getObjectHTML(objectId);
+    $('#myModal')[0].style.display = 'none';
+    drawIntoImage('objectImageContainer_'+objectId , getRepresentationFromMasterDataFor(objectId));
+  }
   //
 
   //NEW OBJECT
@@ -900,6 +944,19 @@
     }
   }
   */
+
+  function openObjectMenu(objectId){
+    var strHTML = getDraggaleDivHtmlFor(objectId)
+    $('#draggableDiv_'+objectId)[0].innerHTML = strHTML;
+    $('#draggableDiv_'+objectId)[0].style.width = '180px';
+  }
+
+  function closeObjectEdit(objectId){
+    var strHTML = getObjectHTML(objectId)
+    $('#draggableDiv_'+objectId)[0].innerHTML = strHTML;
+    $('#draggableDiv_'+objectId)[0].style.width = '80px';
+    $('#objectImageContainer_'+objectId)[0].src = getRepresentationFromMasterDataFor(objectId);
+  }
 
 </script>
 
