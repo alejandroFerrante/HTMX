@@ -2,13 +2,16 @@
 <!-- 
   TODO
   
-  Stage 1
-  when delete representations, rearrange indexes
-  bug: select deletable icons correctly
-  asign representation on object creation
+  Stage 1 OBJECT MANAGEMENT
   
-  Stage 2
-  collaborators
+  Stage 2 INTERACTIONS
+
+  Instructions List
+  Sequence Diagram
+  Numbered Arrows
+
+  Stage 3 COLLABORATORS
+  
 
 
 -->
@@ -312,7 +315,7 @@
     maxDragX = 1056;  
     
     minDragY = 200;
-    maxDragY = 520;
+    maxDragY = 530;
 
     var strObj = '';
     strObj += '<div id="draggableDiv_'+objectId+'" class="dragObjDiv" style="width:80px;height:80px;background-color: rgba(0, 0, 0, 0);border-style: none;" >';
@@ -329,7 +332,8 @@
 
   function getObjectHTML(objectId){
     var strHTML = '';
-    strHTML += '   <img id="objectImageContainer_'+objectId+'" style="position:relative;height:100%;width:100%"/>';
+    strHTML += ' <div  onmouseleave="hideEditIconsFor('+objectId+')" onmouseenter="showEditIconsFor('+objectId+')" >';
+    strHTML += '   <img id="objectImageContainer_'+objectId+'" style="position:relative;height:100%;width:100%" />';
     
     strHTML += '   <div style="width:75%;font-size:50%" > ';
     
@@ -339,13 +343,14 @@
     strHTML += '           <span id="objectNameTitle_'+objectId+'">'+getObjectNameFromMasterDataFor(objectId);
     strHTML += '         </th>';
     strHTML += '         <th>';
-    strHTML += '           <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-picture" onclick="openEditRepresentation('+objectId+')" ></span>';
-    strHTML += '           <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-pencil" onclick="openObjectMenu('+objectId+')" ></span>';
+    strHTML += '           <span id="editRepIcon_'+objectId+'" align="right" style="cursor:pointer;color:black;display:none;" class="glyphicon glyphicon-picture" onclick="openEditRepresentation('+objectId+')" ></span>';
+    strHTML += '           <span id="editionIcon_'+objectId+'" align="right" style="cursor:pointer;color:black;display:none;" class="glyphicon glyphicon-pencil" onclick="openObjectMenu('+objectId+')" ></span>';
     strHTML += '         </th>';
     strHTML += '         </tr>';
     strHTML += '       </table>';
 
     strHTML += '   </div>';
+    strHTML += ' </div>';
     return strHTML;
   }
 
@@ -672,8 +677,16 @@
   //EDIT REPRESENTATION
   function openEditRepresentation(objectId){
     var modalContent =  '   <div class="modal-header">';
-    modalContent     += '     <h4 class="modal-title"> Select new Representation for Object </h4>';
-    modalContent     += '     <div> <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-remove"/> </div>';
+    modalContent     += '     <table>';
+    modalContent     += '       <tr>';
+    modalContent     += '         <th style="width:120%">';
+    modalContent     += '           <h4 class="modal-title"> Select new Representation for Object </h4>';
+    modalContent     += '         </th>';
+    modalContent     += '         <th style="width:20%">';
+    modalContent     += '           <div> <span align="right" style="cursor:pointer;color:white;" class="glyphicon glyphicon-remove" onclick="hideModal()" /> </div>';
+    modalContent     += '         </th>';
+    modalContent     += '       </tr>';
+    modalContent     += '     </table>';
     modalContent     += '   </div> ';
 
     modalContent     += '   <div id="editRepresentationSection" class="modal-body">';
@@ -691,16 +704,29 @@
     $('#myModal')[0].style.display = 'none';
     drawIntoImage('objectImageContainer_'+objectId , getRepresentationFromMasterDataFor(objectId));
   }
+
+  function hideModal(){
+    $('#myModal')[0].style.display = 'none';
+  }
   //
 
   //NEW OBJECT
+  var newObjectSelectedRepIndex;
   function openAddNewObject(objectid){
+    
+    newObjectSelectedRepIndex = 0;
+
     var modalContent =  '   <div class="modal-header">';
     modalContent     += '     <h4 class="modal-title"> New Object Name </h4>';
     modalContent     += '   </div> ';
 
     modalContent     += '   <div class="modal-body">';
+    modalContent     += '     <div id="newObjectRepSelectionSection" >';
+    modalContent     += '     </div>';
+
+    modalContent     += '     <div>';
     modalContent     += '       <input id="newObjectNameInput" style="color:black;" value="">  ';
+    modalContent     += '     </div>';
     modalContent     += '   </div>';
     
     modalContent     += '   <div class="modal-footer">';
@@ -710,6 +736,9 @@
     modalContent     += '   </div>';
 
     document.getElementById("myModal").innerHTML = modalContent;
+
+    fillSectionWithAllIcons('newObjectRepSelectionSection');
+
     document.getElementById("myModal").style.display = "block"; 
   }
 
@@ -737,7 +766,7 @@
           }
         }
 
-        insertObjectWithNameToMasterData(newName);
+        insertObjectWithNameToMasterData(newName , newObjectSelectedRepIndex);
         closeModal();
         fillObjectsList();
         for(var i = 0; i < selectedObjects.length ; i++){
@@ -923,7 +952,7 @@
   }
 
   function showIconsModal(){
-    updateUsedIndexes();
+    redrawIconsManagementSection();
     $('#iconsModal')[0].style.display = 'block';
   }
 

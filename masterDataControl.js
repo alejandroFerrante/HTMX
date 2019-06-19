@@ -80,13 +80,14 @@ function updateRepresentationForObjectFromMasterData(objectId , newIndex){
     master.objects[objectId].representationIndex = newIndex;
 }
 
-function insertObjectWithNameToMasterData( newName){
+function insertObjectWithNameToMasterData(newName , repIndex){
     master.lastID += 1;
     var newObject = {};
     newObject.id = master.lastID;
     newObject.name = newName;
     newObject.methods = [];
     newObject.properties = [];
+    newObject.representationIndex = repIndex;
     master.objects[master.lastID] = newObject;
 }
 
@@ -94,6 +95,20 @@ function restoreObjectToOriginal(objectId){
     if(originalMaster.objects[objectId] != undefined && originalMaster.objects[objectId] != null){
         master.objects[objectId] = originalMaster.objects[objectId];
     }
+}
+
+function arrangeIconIndexesForDeletion(indexToRemove){
+    
+    for(var i = 0; i < master.lastID + 1 ; i++ ){
+        if(master.objects[i] != undefined && master.objects[i] != null){
+            if(master.objects[i].representationIndex > indexToRemove ){
+                //alert(master.objects[i].representationIndex);
+                master.objects[i].representationIndex -= 1;
+                //alert(master.objects[i].representationIndex);
+            }
+        }
+    }
+
 }
 
 function deleteObjectFromMasterData(objectId){

@@ -16,7 +16,7 @@
 
 			icons = iconsList;
 			updateUsedIndexes();
-			fillItemsSectionWithCurrentIcons()
+			fillItemsSectionWithCurrentIcons();
 		}
 
 
@@ -118,12 +118,50 @@
 			
 		}
 
+		function fillSectionWithAllIcons(sectionId){
+
+			var htmlContent = '';
+			htmlContent += '<div style="overflow: auto;padding-bottom:8px;">';
+			htmlContent += '<table style="width:100%;">';
+			htmlContent += '		  <tr>';
+			for(var i= 0; i < icons.length ; i++){
+				
+				htmlContent += '<th>';
+		    	htmlContent += '	<div style="width:60px;height:60px;border-style:solid;border-width:2px;';
+		    	if(i == newObjectSelectedRepIndex){
+		    		htmlContent += 'border-color:red;';
+		    	}
+		    	htmlContent += '" 	 >';
+		    	htmlContent += '		<img id="repSelectImageContainer_'+i+'" onclick="selectNewObjRep('+i+' )" style="cursor:pointer;position:relative;height:100%;width:100%;background-color:white;"/>';	
+		    	htmlContent += '	</div>';
+		    	htmlContent += '</th>';
+		    	
+			}
+			htmlContent += '		  </tr>';
+			htmlContent += '</table>';
+			htmlContent += '</div>';
+
+			$('#'+sectionId)[0].innerHTML = htmlContent;
+			
+			
+			for(var i = 0; i < icons.length; i++){
+				drawIntoImage('repSelectImageContainer_'+i , icons[i]);
+			}
+			
+		}
+
+		function selectNewObjRep(newIndex){
+			newObjectSelectedRepIndex = newIndex;
+			fillSectionWithAllIcons('newObjectRepSelectionSection');
+		}
+
 		function addIcon(){
 			icons.push(getCanvasBase64(canvasId));
 			fillItemsSectionWithCurrentIcons();
 		}
 
 		function removeIcon(indexToRemove){
+			arrangeIconIndexesForDeletion(indexToRemove);
 			icons.splice(indexToRemove, 1);
 			fillItemsSectionWithCurrentIcons();
 		}
@@ -154,6 +192,16 @@
 			}
 		}
 
+		function showEditIconsFor(index){
+			$('#editRepIcon_'+index)[0].style.display = 'block';
+			$('#editionIcon_'+index)[0].style.display = 'block';
+		}
+
+		function hideEditIconsFor(index){
+			$('#editRepIcon_'+index)[0].style.display = 'none';
+			$('#editionIcon_'+index)[0].style.display = 'none';
+		}
+
 		function getIcons(){
 			return icons;
 		}
@@ -167,4 +215,9 @@
 			updateRepresentationForObjectFromMasterData(objectId , newindex);
 			repEditedObjectid = objectId;
 			$(this).trigger( "repEditFinished" );
+		}
+
+		function redrawIconsManagementSection(){
+			usedIndexes = getUsedIconIndexes();
+			fillItemsSectionWithCurrentIcons();		
 		}
