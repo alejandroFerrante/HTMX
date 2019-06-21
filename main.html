@@ -10,18 +10,17 @@
   Sequence Diagram
   Numbered Arrows
 
-  Stage 3 COLLABORATORS
+  Stage 3 COLLABORATORS (GROUPING)
   
   BUGS
-  After cration object list election fucked [insertObjectWithNameToMasterData]
-  After creation no draggable objects [insertObjectWithNameToMasterData]
-  shouldn't be able to create objects if no rep
 
   BACKLOG
-  Representation Edition
+  New Icon on creation
   Object Clone
-  bring fron when edit menu opened
+  Representation Edition
   representations import/export
+  Handwriting
+
 
 
 -->
@@ -193,7 +192,7 @@
 <!-- -->
 
 <!-- MAIN MODAL -->
-<div id="myModal" class="modal">
+<div id="myModal" class="modal" style="z-index:20;">
 
   <div class="modalContent">
     
@@ -208,7 +207,7 @@
 <!-- -->
 
 <!-- ICON MANAGEMENT MODAL-->
-  <div id="iconsModal" class="modal" style="display:none;" >
+  <div id="iconsModal" class="modal" style="display:none;z-index:20;" >
       
            
       <div class="modal-content" style="border-style:solid;border-width:2px;border-color:black;height:60%;width:100%">
@@ -723,33 +722,37 @@
   //NEW OBJECT
   var newObjectSelectedRepIndex;
   function openAddNewObject(objectid){
-    
-    newObjectSelectedRepIndex = 0;
+    if(getRepresentationsFromMasterData().length > 0){
 
-    var modalContent =  '   <div class="modal-header">';
-    modalContent     += '     <h4 class="modal-title"> New Object Name </h4>';
-    modalContent     += '   </div> ';
+      newObjectSelectedRepIndex = 0;
 
-    modalContent     += '   <div class="modal-body">';
-    modalContent     += '     <div id="newObjectRepSelectionSection" >';
-    modalContent     += '     </div>';
+      var modalContent =  '   <div class="modal-header">';
+      modalContent     += '     <h4 class="modal-title"> New Object Name </h4>';
+      modalContent     += '   </div> ';
 
-    modalContent     += '     <div>';
-    modalContent     += '       <input id="newObjectNameInput" style="color:black;" value="">  ';
-    modalContent     += '     </div>';
-    modalContent     += '   </div>';
-    
-    modalContent     += '   <div class="modal-footer">';
-    modalContent     += '     <div id="newObjectErrorMessage" style="color:red" ></div>';
-    modalContent     += '     <button onclick="acceptNewObject()" type="button" class="btn btn-default" data-dismiss="modal">Yes</button>';
-    modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">No</button>';
-    modalContent     += '   </div>';
+      modalContent     += '   <div class="modal-body">';
+      modalContent     += '     <div id="newObjectRepSelectionSection" >';
+      modalContent     += '     </div>';
 
-    document.getElementById("myModal").innerHTML = modalContent;
+      modalContent     += '     <div>';
+      modalContent     += '       <input id="newObjectNameInput" style="color:black;" value="">  ';
+      modalContent     += '     </div>';
+      modalContent     += '   </div>';
+      
+      modalContent     += '   <div class="modal-footer">';
+      modalContent     += '     <div id="newObjectErrorMessage" style="color:red" ></div>';
+      modalContent     += '     <button onclick="acceptNewObject()" type="button" class="btn btn-default" data-dismiss="modal">Yes</button>';
+      modalContent     += '     <button onclick="closeModal()"  type="button" class="btn btn-default" data-dismiss="modal">No</button>';
+      modalContent     += '   </div>';
 
-    fillSectionWithAllIcons('newObjectRepSelectionSection');
+      document.getElementById("myModal").innerHTML = modalContent;
 
-    document.getElementById("myModal").style.display = "block"; 
+      fillSectionWithAllIcons('newObjectRepSelectionSection');
+
+      document.getElementById("myModal").style.display = "block"; 
+    }else{
+      alert('Can not Create Objects if there are no representations!' );
+    }
   }
 
   function acceptNewObject(){
@@ -780,8 +783,8 @@
         closeModal();
         fillObjectsList();
         for(var i = 0; i < selectedObjects.length ; i++){
-          $('#objectCheckBox_'+i)[0].checked = true;
-          dragElement(document.getElementById("draggableDiv_"+i));
+          $('#objectCheckBox_'+selectedObjects[i])[0].checked = true;
+          dragElement(document.getElementById("draggableDiv_"+selectedObjects[i]));
         }
         
 
@@ -988,12 +991,14 @@
     var strHTML = getDraggaleDivHtmlFor(objectId)
     $('#draggableDiv_'+objectId)[0].innerHTML = strHTML;
     $('#draggableDiv_'+objectId)[0].style.width = '180px';
+    $('#draggableDiv_'+objectId)[0].style.zIndex = 15;
   }
 
   function closeObjectEdit(objectId){
     var strHTML = getObjectHTML(objectId)
     $('#draggableDiv_'+objectId)[0].innerHTML = strHTML;
     $('#draggableDiv_'+objectId)[0].style.width = '80px';
+    $('#draggableDiv_'+objectId)[0].style.zIndex = 0;
     $('#objectImageContainer_'+objectId)[0].src = getRepresentationFromMasterDataFor(objectId);
   }
 

@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<html>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
+
+<script type="text/javascript" src="draw2d.min.js" ></script>
+
+<script type="text/javascript">
+//http://www.draw2d.org
+document.addEventListener("DOMContentLoaded",function () {
+	var canvas = new draw2d.Canvas("gfx_holder");
+	var first = new draw2d.shape.node.VerticalBus();
+	var second = new draw2d.shape.node.VerticalBus();
+	var con = new draw2d.Connection();
+	
+	first.selectable = false;
+	first.isDraggable = false;
+	first.height = 600;
+
+	second.selectable = false;
+	second.isDraggable = false;
+	second.height = 600;
+
+	canvas.add( first, 50,50);
+	canvas.add( second, 250,50);
+	
+	con.startX = 50;
+	con.startY = 50;
+
+	con.endX = 250;
+	con.endY = 50;
+	con.draggable = true;
+
+	canvas.add( con);
+
+});
+
+</script>
+
+<div onselectstart="javascript:/*IE8 hack*/return false" id="gfx_holder" style="width:3000px; height:3000px;">
+
+</html>
