@@ -1,7 +1,14 @@
-
+<!-- git pull |  git add .  && git commit -m "someMessage" && git push origin master -->
 <!DOCTYPE html>
 <meta charset="utf-8"/>
 <html>
+
+<style> 
+.transparent { 
+    background-color: black; 
+    color: white;
+} 
+</style> 
 
 <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
 <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
@@ -9,37 +16,185 @@
 <script type="text/javascript" src="draw2d.min.js" ></script>
 
 <script type="text/javascript">
-//http://www.draw2d.org
+//www.draw2d.org/draw2d_touch/jsdoc_6/#!/example
+
+//TODO:
+//	vertical / horizontal indicators sendings extremes
+//	message labels
+//	new sending
+//	edit sending
+//	self sending
+
+// 	integrate with master data
+
+
+var canvas;
+
+var amountOfActors = 5;
+var actors = [];
+
+var baseActorX = 100;
+var baseActorY = 100;
+var ActorInterdistanceX = 200;
+var baseActorHeight = 600;
+
+var sendings = [];
+var interSendingDistanceY = 100;
+
+
+
+var firstSend
+var firstRecieve
+
 document.addEventListener("DOMContentLoaded",function () {
-	var canvas = new draw2d.Canvas("gfx_holder");
-	var first = new draw2d.shape.node.VerticalBus();
-	var second = new draw2d.shape.node.VerticalBus();
-	var con = new draw2d.Connection();
 	
-	first.selectable = false;
-	first.isDraggable = false;
-	first.height = 600;
+	canvas = new draw2d.Canvas("gfx_holder");
+	sendings = [];
 
-	second.selectable = false;
-	second.isDraggable = false;
-	second.height = 600;
+	var sampleSending = {};
+	sampleSending.from = 0;
+	sampleSending.to = 1;
+	sampleSending.message = 'aMessage';
+	sampleSending.additionalParams = [];
+	sampleSending.x = 0;
+	sampleSending.y = 0;
+	sendings.push(sampleSending);
 
-	canvas.add( first, 50,50);
-	canvas.add( second, 250,50);
-	
-	con.startX = 50;
-	con.startY = 50;
+	sampleSending = {};
+	sampleSending.from = 1;
+	sampleSending.to = 0;
+	sampleSending.message = 'anotherMessage';
+	sampleSending.additionalParams = [];
+	sampleSending.x = 1;
+	sampleSending.y = 1;
+	sendings.push(sampleSending);
 
-	con.endX = 250;
-	con.endY = 50;
-	con.draggable = true;
+	sampleSending = {};
+	sampleSending.from = 0;
+	sampleSending.to = 3;
+	sampleSending.message = 'yetAnotherMessage';
+	sampleSending.additionalParams = [];
+	sampleSending.x = 0;
+	sampleSending.y = 1;
+	sendings.push(sampleSending);
 
-	canvas.add( con);
+	drawScreen();
 
 });
 
+function drawScreen(){
+	canvas.clear();
+	var actor;
+	var from;
+	var to;
+	var sendingConnection;
+
+	//DRAW ACTORS
+	for(var i = 0; i < amountOfActors; i++ ){
+		actor = new draw2d.shape.node.VerticalBus();
+		actor.selectable = false;
+		actor.isDraggable = false;
+		
+		actor.height = baseActorHeight; //MAKE IT DINAMIC BASED ON AMOUNT OF SENDINGS
+		
+		actor.alpha = 0.25;
+		//if is sender or reciever make alpha 1
+		canvas.add( actor, baseActorX + (i * ActorInterdistanceX),baseActorY);
+
+		actors.push(actor);
+	}
+
+	//DRAGGING HANDLERS
+	var draggingSender 		= function(x, y, shiftKey, ctrlKey){
+		var myIndex = this.sendingIndex;
+		//alert('My Index:'+myIndex);
+		var newRecieverIndex = detectHorizontal(x);
+		//alert('New Reciever:'+newRecieverIndex);
+
+		if(newRecieverIndex != -1 && sendings[myIndex].from != newRecieverIndex){
+			sendings[myIndex].to = newRecieverIndex;
+		}
+
+		drawScreen();
+	};
+	var draggingReciever 	= function(x, y, shiftKey, ctrlKey){
+		var myIndex = this.sendingIndex;
+		sendings[myIndex].y = y;
+		sendings.sort(function(a, b){return a.y-b.y});
+		drawScreen();
+	}
+
+	//DRAW SENDINGS
+	for(var i = 0; i < sendings.length; i++ ){
+		from = new draw2d.shape.node.Start();
+		from.alpha = 0.5;
+		from.y = baseActorY + (interSendingDistanceY * i);
+		from.sendingIndex = i;
+		sendings[i].y = from.y;
+		//from.draggable = false;
+
+		to   = new draw2d.shape.node.End();
+		to.alpha = 0.5;
+		to.y = baseActorY + (interSendingDistanceY * i);
+		to.sendingIndex = i;
+		//to.draggable = false;
+
+		sendingConnection = new draw2d.Connection();
+		sendingConnection.resizeable = false;
+		sendingConnection.selectable = false;
+
+
+		if(sendings[i].from < sendings[i].to){
+			sendingConnection.setSource(from.getOutputPorts().data[0]);
+			sendingConnection.setTarget(to.getInputPorts().data[0]);
+			from.x = actors[sendings[i].from].x;
+			to.x = actors[sendings[i].to].x;
+			to.onDragEnd = draggingSender;
+			from.onDragEnd = draggingReciever;
+		}else{
+			sendingConnection.setSource(to.getInputPorts().data[0]);
+			sendingConnection.setTarget(from.getOutputPorts().data[0]);
+			from.x = actors[sendings[i].to].x;
+			to.x = actors[sendings[i].from].x;
+			from.onDragEnd = draggingSender;
+			to.onDragEnd = draggingReciever;
+		}
+
+		sendingConnection.setTargetDecorator(new draw2d.decoration.connection.ArrowDecorator());
+
+
+		canvas.add(from);
+		canvas.add(to);
+		canvas.add(sendingConnection);
+
+
+	}
+
+}
+
+
+function detectHorizontal(x){
+	var correspondingX;
+	for(var i = 0; i < amountOfActors; i++ ){
+		correspondingX = baseActorX + (i * ActorInterdistanceX);
+		if(i == 0){
+			if(x < correspondingX + (ActorInterdistanceX/2) ){ return i;}
+		}else if(i == amountOfActors - 1){
+			if(x > correspondingX - (ActorInterdistanceX/2) ){ return i;}
+		}else{
+			if((correspondingX - (ActorInterdistanceX/2) < x) && (x < correspondingX + (ActorInterdistanceX/2) ) ){
+				return i;
+			}
+		}
+		
+	}
+	return -1;
+}
+
+
+
 </script>
 
-<div onselectstart="javascript:/*IE8 hack*/return false" id="gfx_holder" style="width:3000px; height:3000px;">
+<div onselectstart="javascript:/*IE8 hack*/return false" id="gfx_holder" style="width:3000px; height:1000px;">
 
 </html>
