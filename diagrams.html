@@ -10,6 +10,18 @@
 } 
 </style> 
 
+<!-- JQUERY -->
+<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
+<!-- -->
+
+<!-- BOOTSTRAP -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- -->
+
 <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
 <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
 
@@ -20,7 +32,6 @@
 
 //TODO:
 //	vertical / horizontal indicators sendings extremes
-//	message labels
 //	new sending
 //	edit sending
 //	self sending
@@ -28,12 +39,10 @@
 // 	integrate with master data
 
 
-var canvas;
 
-var amountOfActors = 5;
-var actors = [];
 
-var baseActorX = 100;
+//UI/////////////////////////
+var baseActorX = 150;
 var baseActorY = 100;
 var ActorInterdistanceX = 200;
 var baseActorHeight = 600;
@@ -41,42 +50,54 @@ var baseActorHeight = 600;
 var sendings = [];
 var interSendingDistanceY = 100;
 
+var actorsColor = "#e8832c";
+var fromColor = "#679143"
+var toColor = "#414791"
+//////////////////////////////
 
+//VARS////////////////////////
+var canvas;
 
 var firstSend
 var firstRecieve
+
+var amountOfActors = 5;
+var actors = [];
+//////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+function getStubInteraction(){
+	var result = {};
+	result.MessageIndex = 0;
+	result.SelfIndex = 0;
+	return result;
+}
+
+function getStubMessage(anIndex){
+	var result = {};
+	result.name = "updateValue";
+	result.params = ["value"];
+}
+
+function getCollaborators(){
+	return [];
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 document.addEventListener("DOMContentLoaded",function () {
 	
 	canvas = new draw2d.Canvas("gfx_holder");
 	sendings = [];
 
-	var sampleSending = {};
-	sampleSending.from = 0;
-	sampleSending.to = 1;
-	sampleSending.message = 'aMessage';
-	sampleSending.additionalParams = [];
-	sampleSending.x = 0;
-	sampleSending.y = 0;
-	sendings.push(sampleSending);
+	addSending( 0, 1, 'aMessage', [] , 0 , sendings.length);
 
-	sampleSending = {};
-	sampleSending.from = 1;
-	sampleSending.to = 0;
-	sampleSending.message = 'anotherMessage';
-	sampleSending.additionalParams = [];
-	sampleSending.x = 1;
-	sampleSending.y = 1;
-	sendings.push(sampleSending);
 
-	sampleSending = {};
-	sampleSending.from = 0;
-	sampleSending.to = 3;
-	sampleSending.message = 'yetAnotherMessage';
-	sampleSending.additionalParams = [];
-	sampleSending.x = 0;
-	sampleSending.y = 1;
-	sendings.push(sampleSending);
+	addSending( 1, 2, 'anotherMessage', [] , 1 , sendings.length);
+
+
+	addSending( 2, 3, 'yetAnotherMessage', [] , 2 , sendings.length);
+
 
 	drawScreen();
 
@@ -88,6 +109,9 @@ function drawScreen(){
 	var from;
 	var to;
 	var sendingConnection;
+	var label;
+	var icon;
+
 
 	//DRAW ACTORS
 	for(var i = 0; i < amountOfActors; i++ ){
@@ -95,9 +119,15 @@ function drawScreen(){
 		actor.selectable = false;
 		actor.isDraggable = false;
 		
+		actor.bgColor 	= new draw2d.util.Color(actorsColor);
+
 		actor.height = baseActorHeight; //MAKE IT DINAMIC BASED ON AMOUNT OF SENDINGS
 		
 		actor.alpha = 0.25;
+
+		label = new draw2d.shape.basic.Label({text:"sample actor"});
+		actor.add( label , new draw2d.layout.locator.TopLocator());
+
 		//if is sender or reciever make alpha 1
 		canvas.add( actor, baseActorX + (i * ActorInterdistanceX),baseActorY);
 
@@ -131,17 +161,22 @@ function drawScreen(){
 		from.y = baseActorY + (interSendingDistanceY * i);
 		from.sendingIndex = i;
 		sendings[i].y = from.y;
-		//from.draggable = false;
+
+		//icon = new draw2d.shape.icon.Mic();
+		//from.add( icon , new draw2d.layout.locator.CenterLocator() );
 
 		to   = new draw2d.shape.node.End();
 		to.alpha = 0.5;
 		to.y = baseActorY + (interSendingDistanceY * i);
 		to.sendingIndex = i;
-		//to.draggable = false;
 
 		sendingConnection = new draw2d.Connection();
 		sendingConnection.resizeable = false;
 		sendingConnection.selectable = false;
+		label = new draw2d.shape.basic.Label({text:sendings[i].message});
+		label.x = from.x + ((from.x + to.x)/2);
+		label.y = from.y+(from.height/2);
+		sendingConnection.add( label , new draw2d.layout.locator.ConnectionLocator( ));
 
 
 		if(sendings[i].from < sendings[i].to){
@@ -151,6 +186,8 @@ function drawScreen(){
 			to.x = actors[sendings[i].to].x;
 			to.onDragEnd = draggingSender;
 			from.onDragEnd = draggingReciever;
+			from.bgColor 	= new draw2d.util.Color(fromColor);
+			to.bgColor 	= new draw2d.util.Color(toColor);
 		}else{
 			sendingConnection.setSource(to.getInputPorts().data[0]);
 			sendingConnection.setTarget(from.getOutputPorts().data[0]);
@@ -158,6 +195,8 @@ function drawScreen(){
 			to.x = actors[sendings[i].from].x;
 			from.onDragEnd = draggingSender;
 			to.onDragEnd = draggingReciever;
+			to.bgColor 	= new draw2d.util.Color(fromColor);
+			from.bgColor 	= new draw2d.util.Color(toColor);
 		}
 
 		sendingConnection.setTargetDecorator(new draw2d.decoration.connection.ArrowDecorator());
@@ -191,9 +230,43 @@ function detectHorizontal(x){
 	return -1;
 }
 
+function addSending( from, to, message, additionalParams , x , y ){
+	var newSending;
+	newSending = {};
+	newSending.from = from;
+	newSending.to = to;
+	newSending.message = message;
+	newSending.additionalParams = additionalParams;
+	newSending.x = x;
+	newSending.y = y;
+	sendings.push(newSending);
+}
 
+
+function openNewSendingSection(){
+	$('#newSendingButton')[0].style.display = 'none';
+	$('#newSendingSection')[0].style.display = 'block';
+}
+
+function closeNewSendingSection(){
+	$('#newSendingButton')[0].style.display = 'block';
+	$('#newSendingSection')[0].style.display = 'none';
+}
 
 </script>
+
+<!-- <span style="cursor: pointer;color:black;" title="Add" class="glyphicon glyphicon-plus-sign" onclick="addIcon()" ></span> -->
+
+<button id="newSendingButton" onclick="openNewSendingSection()"> New Message Sending</button>
+
+<div id="newSendingSection" style="display:none;" >
+	HIGH
+	<table>
+		
+	</table>
+	<button > OK </button>
+	<button onclick="closeNewSendingSection()" > CANCEL </button>	
+</div>
 
 <div onselectstart="javascript:/*IE8 hack*/return false" id="gfx_holder" style="width:3000px; height:1000px;">
 
