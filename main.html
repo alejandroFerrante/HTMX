@@ -159,7 +159,7 @@
 <!-- -->
 
 <!-- MAIN -->
-  <div class="grid-container">
+  <div id="mainSection" class="grid-container">
     <div class="headerDiv">
       MODEL CONSTRUCT
     </div>
@@ -188,6 +188,8 @@
       </div>  
     </div>
   
+    <div id="diagramContent"></div>
+
   </div>
 <!-- -->
 
@@ -251,7 +253,11 @@
 </body>
 
 <script>
- 
+
+  //INCLUDE DIAGRAMS 
+  document.addEventListener("DOMContentLoaded",function () {
+    $("#diagramContent").load("diagrams.html"); 
+  });
 
   $("#fileInput").change(function() {
     var file = $("#fileInput")[0].files[0];
@@ -266,10 +272,6 @@
 
   $(".dataSaveButton").on("click", function() {
     saveMaster();
-  });
-
-  $( this ).on( "masterDataLoaded", function() {
-    onMasterDataLoaded();
   });
 
   $( this ).on( "repEditFinished", function() {
@@ -521,6 +523,7 @@
 
 
   //EDIT METHOD
+  var slectedImpMode = 0;
   function openEditMethod( objectId , objectMethodName , params ){
     objectEditing = objectId;
     oldMethodName = objectMethodName;
@@ -539,9 +542,10 @@
     
     modalContent     += '   <div class="modal-body">';
     
-    modalContent     += '     <span style="padding-left: 5px;" >';
-    modalContent     += '       Method Name: <input id="editMethodName" style="color:black" value="'+methodName+'"  type="string" ></input>';
-    modalContent     += '     </span>';
+    
+    modalContent     += '   <span style="padding-left: 5px;" >';
+    modalContent     += '     Method Name: <input id="editMethodName" style="color:black" value="'+methodName+'"  type="string" ></input>';
+    modalContent     += '   </span>';
     
     //modalContent     += ''
     modalContent     += '<br/>Parameters: ';
@@ -568,6 +572,24 @@
 
     document.getElementById("myModal").innerHTML = modalContent;
     
+  }
+
+  function showImplementationMenu(){
+    $('#selectImplementationModeSection')[0].style.display = 'block';
+    $('#viewimplementationButon')[0].style.display = 'none';
+    $('#viewimplementationSection')[0].style.width = "17%";
+  }
+
+  function hideImplementationMenu(){
+    $('#selectImplementationModeSection')[0].style.display = 'none';
+    $('#viewimplementationButon')[0].style.display = 'block';
+    $('#viewimplementationSection')[0].style.width = "15%";
+  }
+
+  function goToImplementation(){
+    $('#mainSection')[0].style.display = 'none';
+    $('#myModal')[0].style.display = 'none';
+    initDiagram();
   }
 
   function showNewParamSection(){

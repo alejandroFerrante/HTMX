@@ -1,273 +1,370 @@
 <!-- git pull |  git add .  && git commit -m "someMessage" && git push origin master -->
+<!-- 
+  TODO
+  
+  Stage 1 OBJECT MANAGEMENT
+  
+  Stage 2 INTERACTIONS
+
+  Instructions List
+  Sequence Diagram
+  Numbered Arrows
+
+  Stage 3 COLLABORATORS (GROUPING)
+  
+  BUGS
+
+  BACKLOG
+  New Icon on creation
+  Object Clone
+  Representation Edition
+  representations import/export
+  Handwriting
+
+
+
+-->
 <!DOCTYPE html>
 <meta charset="utf-8"/>
 <html>
+  <head>
 
-<style> 
-.transparent { 
-    background-color: black; 
-    color: white;
-} 
-</style> 
+    <!-- SCRIPTS -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
 
-<!-- JQUERY -->
-<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
-<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="draggable.js"></script>
+    <script type="text/javascript" src="masterDataControl.js"></script>
+    
+    <!-- BOOTSTRAP -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- DRAGGABLE STYLESHEET-->
+    <link rel="stylesheet" type="text/css" href="draggable.css">
+
+    <style>
+      .headerDiv { grid-area: header; }
+      .leftPannel { grid-area: menu; }
+      .upperPannel { grid-area: upperPannel; }
+      .mainPannel { grid-area: main; height:550px;}
+
+      .grid-container {
+        display: grid;
+        grid-template-areas:
+          'header header header header header header'
+          'menu upperPannel upperPannel upperPannel upperPannel upperPannel'
+          'menu main main main main main'
+          'menu footer footer footer footer footer';
+        grid-gap: 10px;
+        background-color: #dbdbdb;
+        padding: 10px;
+      }
+
+      .grid-container > div {
+        background-color: rgba(255, 255, 255, 0.8);
+        text-align: center;
+        padding: 20px 0;
+        font-size: 30px;
+      }
+    </style>
+
+    <!-- MODAL STYLE-->
+    <style>
+    /* The Modal (background) */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 10; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+        color:white;
+      }
+
+      /* Modal Content */
+      .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+      }
+
+      /* The Close Button */
+      .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      </style>
+
+    <!-- ICONS MANAGEMENT -->
+    <script type="text/javascript" src="atrament.min.js"></script>
+    <script type="text/javascript" src="iconsManagement.js"></script>
+    <style>
+      canvas {
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 2;
+      }
+
+      form {
+        z-index: 3;
+        position: fixed;
+        top: 300;
+        left: 100;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 1em;
+        color:white;
+      }
+
+      form * {
+        margin-bottom: 1em;
+      }
+
+      @media (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+        form * {
+          font-size: 1.5em;
+        }
+      }
+
+    </style>
+    <!-- -->
+
+</head>
+
+<body>
+
+<!-- SPLASH -->
+
 <!-- -->
 
-<!-- BOOTSTRAP -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<!-- MAIN -->
+  <div id="mainSection" class="grid-container">
+    <div class="headerDiv">
+      IMPLEMENTATION DEFINITIONS
+    </div>
+    
+    <div class="leftPannel">
+      
+      <div class="loadData">
+        <button style="font-size:20px;" class="dataLoadButton" >Load Master Data</button>
+      </div>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div class="objectsShowList">
+      </div>
+
+    </div>
+    
+    <div class="upperPannel">
+        <div class="upperPannelContent" style="display:none">
+          <button style="font-size:20px;" class="dataSaveButton" >Save Master Data</button>
+          <button style="font-size:20px;" class="selectMessageToImplement" onclick="fillSelectMessageToImplement()" >Select Message to Implement</button>
+        </div>
+    </div>  
+    
+    <div class="mainPannel">
+      
+    </div>
+  
+
+  </div>
 <!-- -->
 
-<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
-<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>
+<!-- MAIN MODAL -->
+<div id="myModal" class="modal" style="z-index:20;">
 
-<script type="text/javascript" src="draw2d.min.js" ></script>
+  <div class="modalContent">
+    
+  </div>
 
-<script type="text/javascript">
-//www.draw2d.org/draw2d_touch/jsdoc_6/#!/example
+</div>
+<!-- -->
 
-//TODO:
-//	vertical / horizontal indicators sendings extremes
-//	new sending
-//	edit sending
-//	self sending
+<!-- HIDDEN DOWNLOAD LINK-->
+<a id="downloadLink" style="display:none" >  </a>
+<input type="file" id="fileInput" name="files[]" style="display:none" />
+<!-- -->
 
-// 	integrate with master data
+<!-- ICON MANAGEMENT MODAL-->
+  <div id="iconsModal" class="modal" style="display:none;z-index:20;" >
+      
+           
+      <div class="modal-content" style="border-style:solid;border-width:2px;border-color:black;height:60%;width:100%">
 
+        <table style="width:100%;padding-left:98%;padding-bottom:1%">
+          <tr>
+            
+            <th>
+              <div style="color:black;"><h3><b>Object Representations</b></h3></div>
+            </th>
+            
+            <th>
+              <span align="right" style="cursor:pointer;color:black;" class="glyphicon glyphicon-remove" onclick="closeIconsSection()" ></span>
+            </th>
+          </tr>
+        </table>
 
+        <div id="itemsSection">
+          
+        </div>
 
+        <div>
+          
+          <div id="newIconSection" >
+            <div style="color:black" ><b>Add New Icon</b></div>
+            <div style="width:100px;height:100px;border-style:solid;border-width:2px;border-color:black" >
+              <canvas id="newIconCanvas" style="cursor: crosshair;position:relative;height:100%;width:100%"></canvas>
+              <div style="padding-top:5px;">
+                <!-- <button  style="color:black;" onclick="doClear()">Clear</button> -->
+                <span style="cursor: pointer;color:black;" title="Clear" class="glyphicon glyphicon-erase" onclick="doClear()" ></span>
+                <span style="cursor: pointer;color:black;" title="Add" class="glyphicon glyphicon-plus-sign" onclick="addIcon()" ></span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-//UI/////////////////////////
-var baseActorX = 150;
-var baseActorY = 100;
-var ActorInterdistanceX = 200;
-var baseActorHeight = 600;
+      </div>
+    </div>
+<!-- -->
 
-var sendings = [];
-var interSendingDistanceY = 100;
+</body>
 
-var actorsColor = "#e8832c";
-var fromColor = "#679143"
-var toColor = "#414791"
-//////////////////////////////
+<script>
 
-//VARS////////////////////////
-var canvas;
+  //INCLUDE DIAGRAMS 
+  /*
+  document.addEventListener("DOMContentLoaded",function () {
+    $("#diagramContent").load("diagrams.html"); 
+  });
+  */
 
-var firstSend
-var firstRecieve
+  $("#fileInput").change(function() {
+    var file = $("#fileInput")[0].files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {  loadMaster(e.target.result); };
+    reader.readAsText(file);
+  });
 
-var amountOfActors = 5;
-var actors = [];
-//////////////////////////////
+  $(".dataLoadButton").on("click", function() {
+    $("#fileInput").trigger("click");
+  });
 
-//////////////////////////////////////////////////////////////////////////
-function getStubInteraction(){
-	var result = {};
-	result.MessageIndex = 0;
-	result.SelfIndex = 0;
-	return result;
-}
-
-function getStubMessage(anIndex){
-	var result = {};
-	result.name = "updateValue";
-	result.params = ["value"];
-}
-
-function getCollaborators(){
-	return [];
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-document.addEventListener("DOMContentLoaded",function () {
-	
-	canvas = new draw2d.Canvas("gfx_holder");
-	sendings = [];
-
-	addSending( 0, 1, 'aMessage', [] , 0 , sendings.length);
-
-
-	addSending( 1, 2, 'anotherMessage', [] , 1 , sendings.length);
-
-
-	addSending( 2, 3, 'yetAnotherMessage', [] , 2 , sendings.length);
-
-
-	drawScreen();
-
-});
-
-function drawScreen(){
-	canvas.clear();
-	var actor;
-	var from;
-	var to;
-	var sendingConnection;
-	var label;
-	var icon;
+  $(".dataSaveButton").on("click", function() {
+    saveMaster();
+  });
 
 
-	//DRAW ACTORS
-	for(var i = 0; i < amountOfActors; i++ ){
-		actor = new draw2d.shape.node.VerticalBus();
-		actor.selectable = false;
-		actor.isDraggable = false;
-		
-		actor.bgColor 	= new draw2d.util.Color(actorsColor);
+  function onMasterDataLoaded(){
+    $('.loadData')[0].style = 'display:none';
+    $('.upperPannelContent')[0].style = 'display:block';
+  }
 
-		actor.height = baseActorHeight; //MAKE IT DINAMIC BASED ON AMOUNT OF SENDINGS
-		
-		actor.alpha = 0.25;
+  var messageOwner;
+  var messageToEidt;
+  function fillSelectMessageToImplement(){
+    var lastusedId = getLastIdFromMasterData();
+    var srtHTML = '';
+    srtHTML += 'SELECT IMPLEMENTATION';
+    srtHTML += '<table style="width:100%;font-size:15px;text-align: center;">';
+    srtHTML += '  <tr>';
+    srtHTML += '    <th style="width:25%;padding-right:10%" >';
+    srtHTML += '      Select Object';
+    srtHTML += '    </th>';
+    srtHTML += '    <th style="width:25%;padding-right:10%" >';
+    srtHTML += '      Select Message';
+    srtHTML += '    </th>';
+    srtHTML += '    <th style="width:25%;padding-right:10%" >';
+    srtHTML += '      Select Implementation Type';
+    srtHTML += '    </th>';
+    srtHTML += '    <th style="width:25%;padding-right:10%" >';
+    srtHTML += '    </th>';
+    
+    
+    srtHTML += '  </tr>';
+    
+    srtHTML += '  <tr>';
+    srtHTML += '    <td style="width:25%;padding-right:10%" >';
+    srtHTML += '      <select id="selectImpObjectPicklist" onchange="onObjectImpSelected()" style="width:80%" >';
+    srtHTML += '        <option value="-1" >none</option>';
+    for(var i = 0 ; i < (lastusedId + 1) ; i++){
+      if(master.objects[i] != undefined && master.objects[i] != null){
+      srtHTML += '  <option value="'+i+'" >'+master.objects[i].name+'</option>';
+      }
+    }
+    srtHTML += '      </select>';
+    srtHTML += '    </td>';
+    
+    srtHTML += '    <td id="messageListSection" style="width:25%;padding-right:10%" >';
+    
+    srtHTML += '    </td>';
 
-		label = new draw2d.shape.basic.Label({text:"sample actor"});
-		actor.add( label , new draw2d.layout.locator.TopLocator());
+    srtHTML += '    <td id="selectImpType" style="width:25%;padding-right:10%" >';
+    srtHTML += '      <div id="selectImpTypeContainer" >';
+    srtHTML += '        <select style="width:80%" >';
+    srtHTML += '        <option value="0">Sequence Diagram</option>';
+    srtHTML += '        </select>';
+    srtHTML += '      </div>';
+    srtHTML += '    </td>';
 
-		//if is sender or reciever make alpha 1
-		canvas.add( actor, baseActorX + (i * ActorInterdistanceX),baseActorY);
+    srtHTML += '    <td id="selectImpButtons" style="width:25%;padding-right:10%" >';
+    srtHTML += '      <div id="electImpButtonsContainer" >';
+    srtHTML += '        <button>Go to Implementation</button>';
+    srtHTML += '        <button>Delete Implementation</button>';
+    srtHTML += '      </div>';
+    srtHTML += '    </td>';
+    srtHTML += '  </tr>';
+    srtHTML += '</table>';
 
-		actors.push(actor);
-	}
+    $('.mainPannel')[0].innerHTML = srtHTML;
 
-	//DRAGGING HANDLERS
-	var draggingSender 		= function(x, y, shiftKey, ctrlKey){
-		var myIndex = this.sendingIndex;
-		//alert('My Index:'+myIndex);
-		var newRecieverIndex = detectHorizontal(x);
-		//alert('New Reciever:'+newRecieverIndex);
+  }  
 
-		if(newRecieverIndex != -1 && sendings[myIndex].from != newRecieverIndex){
-			sendings[myIndex].to = newRecieverIndex;
-		}
+  function onObjectImpSelected(){
+    if($('#selectImpObjectPicklist').val() > 0){
+      messageOwner = $('#selectImpObjectPicklist').val();
+      var methods = getMethodsFromMasterDataFor(messageOwner);
+      if(methods.length > 0){
+        var srtHTML = '';
+        srtHTML += '      <select id="selectMessageToImpPicklist" onchange="onMessageToImpSelected()" style="width:80%" >';
+        for(var i = 0; i < methods.length; i++){
+        srtHTML += '        <option value="'+i+'" >'+methods[i].name+'</option>';
+        }
+        srtHTML += '      </select>';
+        $('#messageListSection')[0].innerHTML = srtHTML;
+        $('#electImpButtonsContainer')[0].style.display = 'block';
+        $('#selectImpTypeContainer')[0].style.display = 'block';
+      }else{
+        $('#messageListSection')[0].innerHTML = 'No Methods. Select Another Object.';
+        $('#electImpButtonsContainer')[0].style.display = 'none';
+        $('#selectImpTypeContainer')[0].style.display = 'none';
+      }
+    }
+  }
 
-		drawScreen();
-	};
-	var draggingReciever 	= function(x, y, shiftKey, ctrlKey){
-		var myIndex = this.sendingIndex;
-		sendings[myIndex].y = y;
-		sendings.sort(function(a, b){return a.y-b.y});
-		drawScreen();
-	}
+  function onMessageToImpSelected(){
 
-	//DRAW SENDINGS
-	for(var i = 0; i < sendings.length; i++ ){
-		from = new draw2d.shape.node.Start();
-		from.alpha = 0.5;
-		from.y = baseActorY + (interSendingDistanceY * i);
-		from.sendingIndex = i;
-		sendings[i].y = from.y;
-
-		//icon = new draw2d.shape.icon.Mic();
-		//from.add( icon , new draw2d.layout.locator.CenterLocator() );
-
-		to   = new draw2d.shape.node.End();
-		to.alpha = 0.5;
-		to.y = baseActorY + (interSendingDistanceY * i);
-		to.sendingIndex = i;
-
-		sendingConnection = new draw2d.Connection();
-		sendingConnection.resizeable = false;
-		sendingConnection.selectable = false;
-		label = new draw2d.shape.basic.Label({text:sendings[i].message});
-		label.x = from.x + ((from.x + to.x)/2);
-		label.y = from.y+(from.height/2);
-		sendingConnection.add( label , new draw2d.layout.locator.ConnectionLocator( ));
-
-
-		if(sendings[i].from < sendings[i].to){
-			sendingConnection.setSource(from.getOutputPorts().data[0]);
-			sendingConnection.setTarget(to.getInputPorts().data[0]);
-			from.x = actors[sendings[i].from].x;
-			to.x = actors[sendings[i].to].x;
-			to.onDragEnd = draggingSender;
-			from.onDragEnd = draggingReciever;
-			from.bgColor 	= new draw2d.util.Color(fromColor);
-			to.bgColor 	= new draw2d.util.Color(toColor);
-		}else{
-			sendingConnection.setSource(to.getInputPorts().data[0]);
-			sendingConnection.setTarget(from.getOutputPorts().data[0]);
-			from.x = actors[sendings[i].to].x;
-			to.x = actors[sendings[i].from].x;
-			from.onDragEnd = draggingSender;
-			to.onDragEnd = draggingReciever;
-			to.bgColor 	= new draw2d.util.Color(fromColor);
-			from.bgColor 	= new draw2d.util.Color(toColor);
-		}
-
-		sendingConnection.setTargetDecorator(new draw2d.decoration.connection.ArrowDecorator());
-
-
-		canvas.add(from);
-		canvas.add(to);
-		canvas.add(sendingConnection);
-
-
-	}
-
-}
-
-
-function detectHorizontal(x){
-	var correspondingX;
-	for(var i = 0; i < amountOfActors; i++ ){
-		correspondingX = baseActorX + (i * ActorInterdistanceX);
-		if(i == 0){
-			if(x < correspondingX + (ActorInterdistanceX/2) ){ return i;}
-		}else if(i == amountOfActors - 1){
-			if(x > correspondingX - (ActorInterdistanceX/2) ){ return i;}
-		}else{
-			if((correspondingX - (ActorInterdistanceX/2) < x) && (x < correspondingX + (ActorInterdistanceX/2) ) ){
-				return i;
-			}
-		}
-		
-	}
-	return -1;
-}
-
-function addSending( from, to, message, additionalParams , x , y ){
-	var newSending;
-	newSending = {};
-	newSending.from = from;
-	newSending.to = to;
-	newSending.message = message;
-	newSending.additionalParams = additionalParams;
-	newSending.x = x;
-	newSending.y = y;
-	sendings.push(newSending);
-}
-
-
-function openNewSendingSection(){
-	$('#newSendingButton')[0].style.display = 'none';
-	$('#newSendingSection')[0].style.display = 'block';
-}
-
-function closeNewSendingSection(){
-	$('#newSendingButton')[0].style.display = 'block';
-	$('#newSendingSection')[0].style.display = 'none';
-}
+  }
 
 </script>
-
-<!-- <span style="cursor: pointer;color:black;" title="Add" class="glyphicon glyphicon-plus-sign" onclick="addIcon()" ></span> -->
-
-<button id="newSendingButton" onclick="openNewSendingSection()"> New Message Sending</button>
-
-<div id="newSendingSection" style="display:none;" >
-	HIGH
-	<table>
-		
-	</table>
-	<button > OK </button>
-	<button onclick="closeNewSendingSection()" > CANCEL </button>	
-</div>
-
-<div onselectstart="javascript:/*IE8 hack*/return false" id="gfx_holder" style="width:3000px; height:1000px;">
 
 </html>

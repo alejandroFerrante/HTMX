@@ -8,7 +8,8 @@ var master;
 function loadMaster(masterText){
 	master = JSON.parse(masterText);
     originalMaster = JSON.parse(masterText);
-	$(this).trigger( "masterDataLoaded" );
+	//$(this).trigger( "masterDataLoaded" );
+    onMasterDataLoaded();
 }
 
 function saveMaster(){
